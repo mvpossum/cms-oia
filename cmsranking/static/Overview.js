@@ -77,8 +77,8 @@ var Overview = new function () {
 
         // HEADERS ("Score" and "Rank")
         self.paper.setStart();
-        self.paper.text(4, 10, "Score").attr("text-anchor", "start");
-        self.paper.text(self.width - 4, 10, "Rank").attr("text-anchor", "end");
+        self.paper.text(4, 10, "Puntaje").attr("text-anchor", "start");
+        self.paper.text(self.width - 4, 10, "Puesto").attr("text-anchor", "end");
         var set = self.paper.setFinish();
         set.attr({"font-size": "12px", "fill": "#000000", "stroke": "none", "font-family": "sans-serif", "opacity": 0});
 

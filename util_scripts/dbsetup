@@ -1,0 +1,11 @@
+#!/bin/bash
+set -x verbose
+echo 'Setting up cms...'
+usermod -a -G cmsuser apolo || exit 1
+sudo -u postgres psql postgres -c "CREATE USER cmsuser WITH PASSWORD '0l1mp1adas';" || exit 1
+sudo -u postgres psql postgres -c "CREATE DATABASE cmsdb;" || exit 1
+sudo -u postgres psql postgres -c "GRANT ALL PRIVILEGES ON DATABASE cmsdb to cmsuser;" || exit 1
+cmsInitDB || exit 1
+echo 'CMS database setup finished'
+exit 0
+

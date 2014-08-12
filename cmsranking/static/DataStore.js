@@ -410,6 +410,7 @@ var DataStore = new function () {
     };
 
     self.create_user = function (key, data) {
+		data["team"]=key[1]+key[2];
         if (data["team"] !== null && self.teams[data["team"]] === undefined)
         {
             console.error("Could not find team " + data["team"] + " for user " + key);
@@ -614,12 +615,13 @@ var DataStore = new function () {
         // Task
         new_t_score = round(new_t_score, task["score_precision"]);
         var old_t_score = user["t_" + t_id];
-        user["t_" + t_id] = new_t_score;
+        user["t_" + t_id] = Math.max(old_t_score, new_t_score);
 
         // Contest
         var new_c_score = 0.0;  // = max(user's score on t for t in contest.tasks)
         for (var i = 0; i < contest.tasks.length; i += 1) {
-            new_c_score += user["t_" + contest.tasks[i].key];
+			if(user["key"][0]==contest.tasks[i].key[1])
+                new_c_score += user["t_" + contest.tasks[i].key];
         }
         new_c_score = round(new_c_score, contest["score_precision"]);
         var old_c_score = user["c_" + c_id];
@@ -668,23 +670,23 @@ var DataStore = new function () {
         });
 
         // Assign ranks
-        var prev_score = null;
-        var rank = 0;
-        var equal = 1;
-
+        var prev_score=[null,null,null,null];
+        var rank=[0,0,0,0];
+        var equal=[1,1,1,1];
+        
         for (var i in list) {
             user = list[i];
             score = user["global"];
-
-            if (score === prev_score) {
-                equal += 1;
+			lvl=user["key"][0];
+            if (score === prev_score[lvl]) {
+                equal[lvl] += 1;
             } else {
-                prev_score = score;
-                rank += equal;
-                equal = 1;
+                prev_score[lvl] = score;
+                rank[lvl] += equal[lvl];
+                equal[lvl] = 1;
             }
 
-            user["rank"] = rank;
+            user["rank"] = rank[lvl];
         }
 
         self.score_events.add(self.update_rank);
@@ -744,24 +746,26 @@ var DataStore = new function () {
         // We don't know old_score but we'll see that it's not needed.
         var new_score = user["global"];
         var old_rank = user["rank"];
+        var lvl=user["key"][0];
         // The new rank is computed by strictly applying the definition:
         //     new_rank = 1 + |{user2 in users, user2.score > user.score}|
         var new_rank = 1;
 
         for (var u2_id in self.users) {
             var user2 = self.users[u2_id];
+            var lvl2=user2["key"][0];
             // this condition is equivalent to
             //     old_score <= user2["global"] < new_score
-            if (old_rank >= user2["rank"] && user2["global"] < new_score) {
+            if (old_rank >= user2["rank"] && user2["global"] < new_score && lvl==lvl2) {
                 user2["rank"] += 1;
                 self.rank_events.fire(u2_id, user2, +1);
             // this condition is equivalent to
             //     new_score <= user2["global"] < old_score
-            } else if (new_score <= user2["global"] && user2["rank"] > old_rank) {
+            } else if (new_score <= user2["global"] && user2["rank"] > old_rank && lvl==lvl2) {
                 user2["rank"] -= 1;
                 self.rank_events.fire(u2_id, user2, -1);
             }
-            if (user2["global"] > new_score) {
+            if (user2["global"] > new_score && lvl==lvl2) {
                 new_rank += 1;
             }
         }
@@ -862,19 +866,19 @@ var DataStore = new function () {
     self.update_network_status = function (state) {
         if (state == 0) { // self.es.CONNECTING
             $("#ConnectionStatus_box").attr("data-status", "reconnecting");
-            $("#ConnectionStatus_text").text("You are disconnected from the server but your browser is trying to connect.");
+            $("#ConnectionStatus_text").text("Estás desconectado del servidor y tu navegador está intentando conectarse.");
         } else if (state == 1) { // self.es.OPEN
             $("#ConnectionStatus_box").attr("data-status", "connected");
-            $("#ConnectionStatus_text").text("You are connected to the server and are receiving live updates.");
+            $("#ConnectionStatus_text").text("Estás conectado al servidor y recibiendo actualizaciones en tiempo real.");
         } else if (state == 2) { // self.es.CLOSED
             $("#ConnectionStatus_box").attr("data-status", "disconnected");
-            $("#ConnectionStatus_text").html("You are disconnected from the server but you can <a onclick=\"DataStore.create_event_source();\">try to connect</a>.");
+            $("#ConnectionStatus_text").html("Estás desconectado del servidor pero puedes <a onclick=\"DataStore.create_event_source();\">intentar conectarte</a>.");
         } else if (state == 3) { // "reload" event received
             $("#ConnectionStatus_box").attr("data-status", "outdated");
-            $("#ConnectionStatus_text").html("Your local data cannot be updated. Please <a onclick=\"window.location.reload();\">reload the page</a>.");
+            $("#ConnectionStatus_text").html("Tus datos locales no pueden ser actualizados. Por favor <a onclick=\"window.location.reload();\">recargar la página</a>.");
         } else if (state == 4) { // an init failed
             $("#ConnectionStatus_box").attr("data-status", "init_error");
-            $("#ConnectionStatus_text").html("An error occurred while loading the data. Check your connection and <a onclick=\"window.location.reload();\">reload the page</a>.");
+            $("#ConnectionStatus_text").html("Ocurrió un error al cargar. Revisa tu conexión y <a onclick=\"window.location.reload();\">recarga la página</a>.");
         }
     };
 
@@ -1161,3 +1165,4 @@ var DataStore = new function () {
         delete old_data["selected"];
     });
 };
+

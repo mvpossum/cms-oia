@@ -135,10 +135,10 @@ var UserDetail = new function () {
             }
 
             var s = "<tr class=\"global\"> \
-                        <td class=\"name\">Global</td> \
+                        <td class=\"name\">Total</td> \
                         <td class=\"score\">" + (self.global_s.length > 0 ? round_to_str(self.global_s[self.global_s.length-1][1], DataStore.global_score_precision) : 0) + "</td> \
                         <td class=\"rank\">" + (self.global_r.length > 0 ? self.global_r[self.global_r.length-1][1] : 1) + "</td> \
-                        <td class=\"btn\"><a>Show</a></td> \
+                        <td class=\"btn\"><a>Mostrar</a></td> \
                     </tr>";
 
             var contests = DataStore.contest_list;
@@ -150,7 +150,7 @@ var UserDetail = new function () {
                          <td class=\"name\">" + contest['name'] + "</td> \
                          <td class=\"score\">" + (self.contest_s[c_id].length > 0 ? round_to_str(self.contest_s[c_id][self.contest_s[c_id].length-1][1], contest["score_precision"]) : 0) + "</td> \
                          <td class=\"rank\">" + (self.contest_r[c_id].length > 0 ? self.contest_r[c_id][self.contest_r[c_id].length-1][1] : 1) + "</td> \
-                         <td class=\"btn\"><a>Show</a></td> \
+                         <td class=\"btn\"><a>Mostrar</a></td> \
                       </tr>"
 
                 var tasks = contest["tasks"];
@@ -162,7 +162,7 @@ var UserDetail = new function () {
                              <td class=\"name\">" + task['name'] + "</td> \
                              <td class=\"score\">" + (self.task_s[t_id].length > 0 ? round_to_str(self.task_s[t_id][self.task_s[t_id].length-1][1], task["score_precision"]) : 0) + "</td> \
                              <td class=\"rank\">" + (self.task_r[t_id].length > 0 ? self.task_r[t_id][self.task_r[t_id].length-1][1] : 1) + "</td> \
-                             <td class=\"btn\"><a>Show</a></td> \
+                             <td class=\"btn\"><a>Mostrar</a></td> \
                           </tr>"
                 }
             }
@@ -246,8 +246,8 @@ var UserDetail = new function () {
 <table> \
     <thead> \
         <tr> \
-            <td>Time</td> \
-            <td>Score</td> \
+            <td>Tiempo</td> \
+            <td>Puntuación</td> \
             <td>Token</td> \
             " + (DataStore.tasks[task_id]['extra_headers'].length > 0 ? "<td>" + DataStore.tasks[task_id]['extra_headers'].join("</td><td>") + "</td>" : "") + " \
         </tr> \

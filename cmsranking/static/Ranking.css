@@ -14,7 +14,7 @@ body {
     margin: 0;
 }
 
-/* TODO: the following two might be omitted */
+/* TODO: the following two might beConnectionStatus_box omitted */
 
 td {
     padding: 0;
@@ -1093,6 +1093,52 @@ abbr {
     font-style: italic;
 }
 
+
+
+/* Style for Nivel buttons */
+.Nivel_box {
+    display: inline-block;
+    position: relative;
+    float: left;
+    margin: 0.5em;
+    text-align: right;
+    z-index: 2;
+}
+
+.Nivel_label {
+    display: inline-block;
+    position: relative;
+    height: 1.5em;
+    padding: 0.25em 20px;
+    margin: -1px 0;
+    z-index: 2;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px;
+    -webkit-user-select: none;
+       -moz-user-select: none;
+        -ms-user-select: none;
+         -o-user-select: none;
+            user-select: none;
+}
+
+.Nivel_box:hover .Nivel_label {
+    background-color: #00EE00;
+}
+
+.Nivel_text {
+    display: none;
+    position: absolute;
+    top: 2em;
+    right: 0;
+    width: 240px;
+    padding: 0.5em;
+    margin-top: -1px;
+    z-index: 1;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 4px 0 4px 4px;
+}
 
 /* Style for the network status indicator */
 

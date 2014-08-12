@@ -18,12 +18,12 @@
 var Scoreboard = new function () {
     var self = this;
 
-    self.init = function () {
+    self.init = function (lvl) {
         self.tcols_el = $('#Scoreboard_cols');
         self.thead_el = $('#Scoreboard_head');
         self.tbody_el = $('#Scoreboard_body');
 
-        self.generate();
+        self.generate(lvl);
 
         DataStore.user_create.add(self.create_user);
         DataStore.user_update.add(self.update_user);
@@ -35,9 +35,9 @@ var Scoreboard = new function () {
     };
 
 
-    self.generate = function () {
-        self.tcols_el.html(self.make_cols());
-        self.thead_el.html(self.make_head());
+    self.generate = function (lvl) {
+        self.tcols_el.html(self.make_cols(lvl));
+        self.thead_el.html(self.make_head(lvl));
 
         // Create callbacks for sorting
         self.thead_el.on("click", "th.score", function () {
@@ -63,7 +63,9 @@ var Scoreboard = new function () {
         });
 
         self.sort_key = "global";
-        self.make_body();
+        self.user_list = new Array();
+        self.tbody_el.html("");
+        self.make_body(lvl);
 
         // Set initial style
         $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el).addClass("sort_key");
@@ -92,7 +94,7 @@ var Scoreboard = new function () {
     };
 
 
-    self.make_cols = function () {
+    self.make_cols = function (lvl) {
         // We want some columns to have a fixed, constant width at all screen
         // sizes (i.e. the sel, rank and team columns) while having the other
         // columns scale accoring to the available horizontal space. Yet, we
@@ -148,13 +150,11 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-
-                result += " \
-<col class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"/> <col/><col/>";
+				if(task["short_name"][1]==lvl[0]){
+				    result += " \
+    <col class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"/> <col/><col/>";
+		        }
             }
-
-            result += " \
-<col class=\"score contest\" data-contest=\"" + c_id + "\" data-sort_key=\"c_" + c_id + "\"/> <col/><col/><col/>";
         }
 
         result += " \
@@ -164,15 +164,15 @@ var Scoreboard = new function () {
     };
 
 
-    self.make_head = function () {
+    self.make_head = function (lvl) {
         // See the comment in .make_cols() for the reason we use colspans.
         var result = " \
 <tr> \
     <th class=\"sel\"></th> \
-    <th class=\"rank\">Rank</th> \
-    <th colspan=\"10\" class=\"f_name\">First Name</th> \
-    <th colspan=\"10\" class=\"l_name\">Last Name</th> \
-    <th class=\"team\">Team</th>";
+    <th class=\"rank\">Puesto</th> \
+    <th colspan=\"10\" class=\"f_name\">Nombre</th> \
+    <th colspan=\"10\" class=\"l_name\">Apellido</th> \
+    <th class=\"team\">Escuela</th>";
 
         var contests = DataStore.contest_list;
         for (var i in contests) {
@@ -183,35 +183,35 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-
-                result += " \
-    <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"] + "</abbr></th>";
+				if(task["short_name"][1]==lvl[0]){
+                    result += " \
+        <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"] + "</abbr></th>";
+			    }
             }
-
-            result += " \
-    <th colspan=\"4\" class=\"score contest\" data-contest=\"" + c_id + "\" data-sort_key=\"c_" + c_id + "\">" + contest["name"] + "</th>";
         }
 
         result += " \
-    <th colspan=\"5\" class=\"score global\" data-sort_key=\"global\">Global</th> \
+    <th colspan=\"5\" class=\"score global\" data-sort_key=\"global\">Total</th> \
 </tr>";
 
         return result;
     };
 
 
-    self.make_body = function () {
+    self.make_body = function (lvl) {
         for (var u_id in DataStore.users) {
             var user = DataStore.users[u_id];
-            user["row"] = $(self.make_row(user))[0];
-            self.user_list.push(user);
+            if(user["key"][0] == lvl[0]){
+			    user["row"] = $(self.make_row(user, lvl))[0];
+			    self.user_list.push(user);
+			}
         }
 
         self.sort();
     };
 
 
-    self.make_row = function (user) {
+    self.make_row = function (user, lvl) {
         // See the comment in .make_cols() for the reason we use colspans.
         var result = " \
 <tr class=\"user\" data-user=\"" + user["key"] + "\"> \
@@ -219,7 +219,7 @@ var Scoreboard = new function () {
     <td class=\"rank\">" + user["rank"] + "</td> \
     <td colspan=\"10\" class=\"f_name\">" + user["f_name"] + "</td> \
     <td colspan=\"10\" class=\"l_name\">" + user["l_name"] + "</td>";
-
+    
         if (user['team']) {
             result += " \
     <td class=\"team\"><img src=\"" + Config.get_flag_url(user["team"]) + "\" title=\"" + DataStore.teams[user["team"]]["name"] + "\" /></td>";
@@ -237,17 +237,13 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-
-                var score_class = self.get_score_class(user["t_" + t_id], task["max_score"]);
-                result += " \
-    <td colspan=\"3\" class=\"score task " + score_class + "\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\">" + round_to_str(user["t_" + t_id], task["score_precision"]) + "</td>";
+				if(task["short_name"][1]==lvl[0]){
+                    var score_class = self.get_score_class(user["t_" + t_id], task["max_score"]);
+                    result += " \
+        <td colspan=\"3\" class=\"score task " + score_class + "\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\">" + round_to_str(user["t_" + t_id], task["score_precision"]) + "</td>";
+		        }
             }
-
-            var score_class = self.get_score_class(user["c_" + c_id], contest["max_score"]);
-            result += " \
-    <td colspan=\"4\" class=\"score contest " + score_class + "\" data-contest=\"" + c_id + "\" data-sort_key=\"c_" + c_id + "\">" + round_to_str(user["c_" + c_id], contest["score_precision"]) + "</td>";
         }
-
         var score_class = self.get_score_class(user["global"], DataStore.global_max_score);
         result += " \
     <td colspan=\"5\" class=\"score global " + score_class + "\" data-sort_key=\"global\">" + round_to_str(user["global"], DataStore.global_score_precision) + "</td> \
@@ -387,12 +383,6 @@ var Scoreboard = new function () {
 
         $row.children("td.f_name").text(user["f_name"]);
         $row.children("td.l_name").text(user["l_name"]);
-
-        if (user["team"]) {
-            $row.children(".team").html("<img src=\"" + Config.get_flag_url(user["team"]) + "\" title=\"" + DataStore.teams[user["team"]]["name"] + "\" />");
-        } else {
-            $row.children(".team").text("");
-        }
     };
 
 

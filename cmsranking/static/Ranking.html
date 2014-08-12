@@ -34,8 +34,20 @@ if (!("EventSource" in window)) {
                 <img src="logo" />
             </div>
             <div id="UpperPanel">
+                <div id="Nivel1" class="Nivel_box">
+                    <div class="Nivel_label">Nivel 1</div>
+                    <div class="Nivel_text"></div>
+                </div>
+                <div id="Nivel2" class="Nivel_box">
+                    <div class="Nivel_label">Nivel 2</div>
+                    <div class="Nivel_text"></div>
+                </div>
+                <div id="Nivel3" class="Nivel_box">
+                    <div class="Nivel_label">Nivel 3</div>
+                    <div class="Nivel_text"></div>
+                </div>
                 <div id="ConnectionStatus_box">
-                    <div id="ConnectionStatus_label">Status</div>
+                    <div id="ConnectionStatus_label">Estado</div>
                     <div id="ConnectionStatus_text"></div>
                 </div>
             </div>
@@ -43,9 +55,9 @@ if (!("EventSource" in window)) {
                 <div id="TimeView_name"></div>
                 <div id="TimeView_selector">
                     <div id="TimeView_time"></div><div id="TimeView_expand"><div class="caret"></div></div>
-                    <div id="TimeView_selector_elapsed">Elapsed time</div>
-                    <div id="TimeView_selector_remaining">Remaining time</div>
-                    <div id="TimeView_selector_current">Current time</div>
+                    <div id="TimeView_selector_elapsed">Tiempo transcurrido</div>
+                    <div id="TimeView_selector_remaining">Tiempo restante</div>
+                    <div id="TimeView_selector_current">Hora actual</div>
                 </div>
             </div>
             <div id="SidePanel">
@@ -59,8 +71,8 @@ if (!("EventSource" in window)) {
                 </table>
             </div>
         </div>
-        <input id="TeamSearch_input" type="search" placeholder="Search Team"/>
-        <div id="TeamSearch_bg">
+        <input id="TeamSearch_input" type="search" placeholder="Search Team" hidden/>
+        <div id="TeamSearch_bg" hidden>
             <div id="TeamSearch">
                 <img id="TeamSearch_close" src="img/close.png"/>
                 <div id="TeamSearch_body"></div>
@@ -86,8 +98,8 @@ if (!("EventSource" in window)) {
                             <thead>
                                 <tr>
                                     <td></td>
-                                    <td>Score</td>
-                                    <td>Rank</td>
+                                    <td>Puntaje</td>
+                                    <td>Puesto</td>
                                     <td></td>
                                 </tr>
                             </thead>

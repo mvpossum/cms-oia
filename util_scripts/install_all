@@ -1,0 +1,16 @@
+#!/bin/bash
+set -x verbose
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+./setup.py build || exit 1
+sudo ./setup.py install || exit 1
+
+#postgres
+sudo cp $DIR/conf/pg_hba.conf $DIR/conf/postgresql.conf /var/lib/postgres/data/ || exit 1
+#cmsconf
+cp $DIR/conf/cms.conf $DIR/conf/cms.ranking.conf /usr/local/etc/ || exit 1
+
+#ranking
+rm -r /var/local/lib/cms/ranking/*
+cp $DIR/ranking/logo.jpg /var/local/lib/cms/ranking/logo.jpg || exit 1
+cp -r $DIR/ranking/teams /var/local/lib/cms/ranking/ || exit 1
+cp -r $DIR/ranking/flags /var/local/lib/cms/ranking/ || exit 1

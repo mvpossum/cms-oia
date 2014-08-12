@@ -1,0 +1,11 @@
+name: "ejemplo"
+description: "Ejemplo"
+tasks:
+  - "ejemplo_simple"
+  - "ejemplo_con_corrector"
+users:
+  - username: "1po1"
+    password: "p1"
+#dejar esto por las dudas
+primary_language: es
+token_mode: disabled
