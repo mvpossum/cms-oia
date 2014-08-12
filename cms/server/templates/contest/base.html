@@ -61,7 +61,7 @@ $(document).ready(function () {
 {% end %}
 {% if current_user is not None %}
                     <p class="navbar-text pull-right">
-                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>") % {"first_name": current_user.first_name, "last_name": current_user.last_name, "username": current_user.username} %}
+                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>") % {"first_name": current_user.first_name, "last_name": current_user.last_name, "username": current_user.username, "lvl": current_user.username[0]} %}
                         <a class="btn btn-warning" href="{{ url_root }}/logout">{{ _("Logout") }}</a>
                     </p>
 {% end %}
