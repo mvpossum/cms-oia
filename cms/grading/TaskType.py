@@ -156,7 +156,7 @@ class TaskType(object):
         return re.sub("([A-Z])", " \g<1>",
                       self.__class__.__name__).strip().capitalize()
 
-    testable = True
+    testable = False
 
     def get_compilation_commands(self, submission_format):
         """Return the compilation commands for all supported languages

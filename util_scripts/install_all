@@ -1,6 +1,14 @@
 #!/bin/bash
 set -x verbose
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+#regenerate localizations
+xgettext -o cms/server/po/messages.pot --language=Python --no-location \
+  --keyword=_:1,2 --keyword=N_ --keyword=N_:1,2 --width=79 \
+  cms/grading/*.py cms/grading/*/*.py cms/server/*.py \
+  cms/server/templates/admin/*.html \
+  cms/server/templates/contest/*.html || exit 1
+
+#build n install
 ./setup.py build || exit 1
 sudo ./setup.py install || exit 1
 
