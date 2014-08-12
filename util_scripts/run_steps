@@ -8,3 +8,9 @@ cmsImporter -d regional2014
 cmsResourceService -a 1
 cmsRankingWebSever
 
+
+iptables -D TCP 1  #elimina la regla 1, de aceptar a cualquier en peurto 8080
+iptables -A TCP -p tcp -m tcp --dport 8080 -s <PONERIPACA> -j ACCEPT   #abre puerto para tal ip
+iptables -A TCP -p tcp -m tcp --dport 8890 -j ACCEPT   #abre el puerto del ranking
+
+
