@@ -23,7 +23,8 @@ Changes done
 - Added spanish translations.
 - Users & problems name special codification
 - Scoreboard separated by levels.
-- Added a few util_scripts (probably you'll have to modify them, so read and understand before run)
+- Added a few util_scripts (probably you'll have to modify them, so read first)
+- The score shown in the scoreboard is the max between all the submissions.
 - Other dirty changes like disabling Testing, hiding some texts, etc.
 
 
@@ -38,7 +39,9 @@ For example:
 2pocharles
 
 It's a username level 2 from "po" school.
-The school will be automatically parsed as the user's team at the scoreboard.
+The school code will be automatically parsed as the user's team at the scoreboard.
+Note: level can be 1, 2, 3, or x. x's users will see the problems for all levels.
+Not following this format will lead to undefined behavior.
 
 
 Problem names
@@ -49,7 +52,7 @@ N[level]whatever
 
 For example:
 
-N3rmq
+N3travellingsalesman
 
 Scoreboard
 ------------
