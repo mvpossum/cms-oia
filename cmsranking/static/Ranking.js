@@ -50,17 +50,27 @@ $(document).ready(function() {
         $("#Nivel1").css('background', '#00cc00');
         $("#Nivel2").css('background', '');
         $("#Nivel3").css('background', '');
+        $("#NivelX").css('background', '');
 	});
 	$("#Nivel2").click(function (event) {
         Scoreboard.generate("2");
         $("#Nivel1").css('background', '');
         $("#Nivel2").css('background', '#00cc00');
         $("#Nivel3").css('background', '');
+        $("#NivelX").css('background', '');
 	});
 	$("#Nivel3").click(function (event) {
         Scoreboard.generate("3");
         $("#Nivel1").css('background', '');
         $("#Nivel2").css('background', '');
         $("#Nivel3").css('background', '#00cc00');
+        $("#NivelX").css('background', '');
+	});
+	$("#NivelX").click(function (event) {
+        Scoreboard.generate("x");
+        $("#Nivel1").css('background', '');
+        $("#Nivel2").css('background', '');
+        $("#Nivel3").css('background', '');
+        $("#NivelX").css('background', '#00cc00');
 	});
 });

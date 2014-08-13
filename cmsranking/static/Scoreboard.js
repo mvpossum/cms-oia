@@ -150,7 +150,7 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==lvl[0]){
+				if(task["short_name"][1]==lvl[0] || lvl[0]=="x"){
 				    result += " \
     <col class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"/> <col/><col/>";
 		        }
@@ -183,7 +183,7 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==lvl[0]){
+				if(task["short_name"][1]==lvl[0] || lvl[0]=="x"){
                     result += " \
         <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"] + "</abbr></th>";
 			    }
@@ -237,7 +237,7 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==lvl[0]){
+				if(task["short_name"][1]==lvl[0] || lvl[0]=="x"){
                     var score_class = self.get_score_class(user["t_" + t_id], task["max_score"]);
                     result += " \
         <td colspan=\"3\" class=\"score task " + score_class + "\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\">" + round_to_str(user["t_" + t_id], task["score_precision"]) + "</td>";

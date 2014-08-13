@@ -161,7 +161,7 @@ $(document).ready(function () {
                             </li>
     {% if actual_phase == 0 %}
         {% for t_iter in contest.tasks %}
-            {% if current_user.username[0] ==  t_iter.name[1] %}
+            {% if current_user.username[0] ==  t_iter.name[1] or current_user.username[0] == "x" %}
                             <li class="nav-header">
                                 {{ t_iter.name }}
                             </li>

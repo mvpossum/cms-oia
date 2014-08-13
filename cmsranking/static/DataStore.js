@@ -410,15 +410,9 @@ var DataStore = new function () {
     };
 
     self.create_user = function (key, data) {
-		data["team"]=key[1]+key[2];
-        if (data["team"] !== null && self.teams[data["team"]] === undefined)
+        if (key.length>=3 && self.teams[key[1]+key[2]] !== undefined)
         {
-            console.error("Could not find team " + data["team"] + " for user " + key);
-            if (self.es) {
-                self.es.close();
-            }
-            self.update_network_status(4);
-            return;
+			data["team"]=key[1]+key[2];
         }
 
         data["key"] = key;
@@ -620,7 +614,7 @@ var DataStore = new function () {
         // Contest
         var new_c_score = 0.0;  // = max(user's score on t for t in contest.tasks)
         for (var i = 0; i < contest.tasks.length; i += 1) {
-			if(user["key"][0]==contest.tasks[i].key[1])
+			if(user["key"][0]==contest.tasks[i].key[1] || user["key"][0]=="x")
                 new_c_score += user["t_" + contest.tasks[i].key];
         }
         new_c_score = round(new_c_score, contest["score_precision"]);
@@ -678,6 +672,8 @@ var DataStore = new function () {
             user = list[i];
             score = user["global"];
 			lvl=user["key"][0];
+			if(lvl=="x")
+			    lvl=0;
             if (score === prev_score[lvl]) {
                 equal[lvl] += 1;
             } else {
@@ -747,6 +743,8 @@ var DataStore = new function () {
         var new_score = user["global"];
         var old_rank = user["rank"];
         var lvl=user["key"][0];
+		if(lvl=="x")
+			lvl=0;
         // The new rank is computed by strictly applying the definition:
         //     new_rank = 1 + |{user2 in users, user2.score > user.score}|
         var new_rank = 1;
@@ -754,6 +752,8 @@ var DataStore = new function () {
         for (var u2_id in self.users) {
             var user2 = self.users[u2_id];
             var lvl2=user2["key"][0];
+			if(lvl2=="x")
+			    lvl2=0;
             // this condition is equivalent to
             //     old_score <= user2["global"] < new_score
             if (old_rank >= user2["rank"] && user2["global"] < new_score && lvl==lvl2) {
