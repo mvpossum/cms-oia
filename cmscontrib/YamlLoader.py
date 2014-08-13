@@ -30,6 +30,7 @@ import os
 import os.path
 import sys
 import yaml
+import csv
 from datetime import timedelta
 
 from cms import LANGUAGES, LANGUAGE_TO_HEADER_EXT_MAP
@@ -206,6 +207,13 @@ class YamlLoader(Loader):
         self.users_conf = dict((user['username'], user)
                                for user
                                in load(conf, None, ["users", "utenti"]))
+
+        translation={'Nombre':'first_name', 'Apellido':'last_name', 'Username':'username', 'Password':'password'}
+        with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
+            reader = csv.DictReader(infile)
+            for row in reader:
+                   self.users_conf[row['Username']]={translation[key]:unicode(row[key], "utf-8") for key in ('Nombre','Apellido', 'Username', 'Password')}
+       
         users = self.users_conf.keys()
 
         return Contest(**args), tasks, users
