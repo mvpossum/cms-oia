@@ -1,0 +1,29 @@
+Using configuration file /usr/local/etc/cms.ranking.conf.
+Traceback (most recent call last):
+  File "/usr/lib/python2.7/site-packages/gevent/greenlet.py", line 327, in run
+    result = self._run(*self.args, **self.kwargs)
+  File "/usr/lib/python2.7/site-packages/gevent/baseserver.py", line 282, in serve_forever
+    self.start()
+  File "/usr/lib/python2.7/site-packages/gevent/baseserver.py", line 234, in start
+    self.init_socket()
+  File "/usr/lib/python2.7/site-packages/gevent/pywsgi.py", line 639, in init_socket
+    StreamServer.init_socket(self)
+  File "/usr/lib/python2.7/site-packages/gevent/server.py", line 78, in init_socket
+    self.socket = self.get_listener(self.address, self.backlog, self.family)
+  File "/usr/lib/python2.7/site-packages/gevent/server.py", line 89, in get_listener
+    return _tcp_listener(address, backlog=backlog, reuse_addr=self.reuse_addr, family=family)
+  File "/usr/lib/python2.7/site-packages/gevent/server.py", line 153, in _tcp_listener
+    sock.bind(address)
+  File "<string>", line 1, in bind
+error: [Errno 98] Address already in use: (u'', 8890)
+<Greenlet at 0x7ff36f748af0: <bound method WSGIServer.serve_forever of <WSGIServer at 0x7ff36f20d410 address=:8890>>> failed with error
+
+Using configuration file /usr/local/etc/cms.ranking.conf.
+127.0.0.1 - - [2014-08-16 11:17:50] "PUT /contests/ HTTP/1.1" 204 124 0.007289
+127.0.0.1 - - [2014-08-16 11:17:50] "PUT /tasks/ HTTP/1.1" 204 124 0.011531
+127.0.0.1 - - [2014-08-16 11:17:50] "PUT /users/ HTTP/1.1" 204 124 0.022669
+e Using configuration file /usr/local/etc/cms.ranking.conf.
+127.0.0.1 - - [2014-08-16 11:28:23] "PUT /contests/ HTTP/1.1" 204 124 0.009825
+127.0.0.1 - - [2014-08-16 11:28:23] "PUT /tasks/ HTTP/1.1" 204 124 0.015918
+127.0.0.1 - - [2014-08-16 11:28:24] "PUT /users/ HTTP/1.1" 204 124 0.018335
+c ^CKeyboardInterrupt

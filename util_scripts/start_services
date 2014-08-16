@@ -4,5 +4,5 @@ focus
 split
 screen -t log -L cmsLogService
 focus
-screen -t resources -L cmsResourceService -a 1
+screen -t resources -L sudo cmsResourceService -a 1
 

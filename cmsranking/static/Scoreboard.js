@@ -17,7 +17,7 @@
 
 var Scoreboard = new function () {
     var self = this;
-
+    var niv="1";
     self.init = function (lvl) {
         self.tcols_el = $('#Scoreboard_cols');
         self.thead_el = $('#Scoreboard_head');
@@ -36,6 +36,7 @@ var Scoreboard = new function () {
 
 
     self.generate = function (lvl) {
+		this.niv=niv;
         self.tcols_el.html(self.make_cols(lvl));
         self.thead_el.html(self.make_head(lvl));
 
@@ -310,12 +311,13 @@ var Scoreboard = new function () {
             }
             list[i] = user;
             user["index"] = i;
-
-            if (i == 0) {
-                self.tbody_el.prepend(user["row"]);
-            } else {
-                self.tbody_el.children("tr.user[data-user=" + list[i-1]["key"] + "]").after(user["row"]);
-            }
+            if (niv==user["key"][0]){
+                if (i == 0) {
+                    self.tbody_el.prepend(user["row"]);
+                } else {
+                    self.tbody_el.children("tr.user[data-user=" + list[i-1]["key"] + "]").after(user["row"]);
+                }
+		    }
         } else if (i < list_l-1 && compare(list[i+1], user) == -1) {
             // Move down
 
@@ -327,10 +329,12 @@ var Scoreboard = new function () {
             list[i] = user;
             user["index"] = i;
 
-            if (i == list_l-1) {
-                self.tbody_el.append(user["row"]);
-            } else {
-                self.tbody_el.children("tr.user[data-user=" + list[i+1]["key"] + "]").before(user["row"]);
+            if (niv==user["key"][0]){
+                if (i == list_l-1) {
+                    self.tbody_el.append(user["row"]);
+                } else {
+                    self.tbody_el.children("tr.user[data-user=" + list[i+1]["key"] + "]").before(user["row"]);
+                }
             }
         }
     };
@@ -400,43 +404,47 @@ var Scoreboard = new function () {
 
     // This callback is called by the DataStore when a user changes score.
     self.score_handler = function (u_id, user, t_id, task, delta) {
-        var $row = $(user["row"]);
+		if(user["key"]==niv[0]){
+            var $row = $(user["row"]);
+    
+            // TODO improve this method: avoid walking over all cells
 
-        // TODO improve this method: avoid walking over all cells
+            $row.children("td.score").each(function () {
+                var $this = $(this);
 
-        $row.children("td.score").each(function () {
-            var $this = $(this);
+                var score = user[$this.data("sort_key")];
 
-            var score = user[$this.data("sort_key")];
+                if ($this.hasClass("global")) {
+                    var max_score = DataStore.global_max_score;
+                    $this.text(round_to_str(score, DataStore.global_score_precision));
+                } else if ($this.hasClass("contest")) {
+                    var contest = DataStore.contests[$this.data("contest")];
+                    var max_score = contest["max_score"];
+                    $this.text(round_to_str(score, contest["score_precision"]));
+                } else if ($this.hasClass("task")) {
+                    var task = DataStore.tasks[$this.data("task")];
+                    var max_score = task["max_score"];
+                    $this.text(round_to_str(score, task["score_precision"]));
+                }
 
-            if ($this.hasClass("global")) {
-                var max_score = DataStore.global_max_score;
-                $this.text(round_to_str(score, DataStore.global_score_precision));
-            } else if ($this.hasClass("contest")) {
-                var contest = DataStore.contests[$this.data("contest")];
-                var max_score = contest["max_score"];
-                $this.text(round_to_str(score, contest["score_precision"]));
-            } else if ($this.hasClass("task")) {
-                var task = DataStore.tasks[$this.data("task")];
-                var max_score = task["max_score"];
-                $this.text(round_to_str(score, task["score_precision"]));
-            }
+                // TODO we could user a data-* attribute to store the score class
 
-            // TODO we could user a data-* attribute to store the score class
-
-            var score_class = self.get_score_class(score, max_score);
-            $this.removeClass("score_0 score_0_10 score_10_20 score_20_30 score_30_40 score_40_50 score_50_60 score_60_70 score_70_80 score_80_90 score_90_100 score_100");
-            $this.addClass(score_class);
-        });
+                var score_class = self.get_score_class(score, max_score);
+                $this.removeClass("score_0 score_0_10 score_10_20 score_20_30 score_30_40 score_40_50 score_50_60 score_60_70 score_70_80 score_80_90 score_90_100 score_100");
+                $this.addClass(score_class);
+       	    });
+		}
 
         self.move_user(user);
 
-        // Restart CSS animation
-        $row.removeClass("score_up score_down");
-        if (delta > 0) {
+		if(user["key"]==niv[0]){
+            // Restart CSS animation
+            $row.removeClass("score_up score_down");
+            if (delta > 0) {
             $row.addClass("score_up");
-        } else if (delta < 0) {
-            $row.addClass("score_down");
+            } else if (delta < 0) {
+                $row.addClass("score_down");
+            }
         }
     };
 
