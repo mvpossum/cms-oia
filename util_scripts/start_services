@@ -1,0 +1,8 @@
+split
+screen -t ranking -L cmsRankingWebServer
+focus
+split
+screen -t log -L cmsLogService
+focus
+screen -t resources -L cmsResourceService -a 1
+

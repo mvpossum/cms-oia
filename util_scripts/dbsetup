@@ -1,4 +1,5 @@
 #!/bin/bash
+exit 1 #use it only for guide
 set -x verbose
 echo 'Setting up cms...'
 usermod -a -G cmsuser apolo || exit 1
