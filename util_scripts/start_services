@@ -1,8 +1,5 @@
-split
-screen -t ranking -L cmsRankingWebServer
-focus
-split
-screen -t log -L cmsLogService
-focus
 screen -t resources -L sudo cmsResourceService -a 1
-
+screen -t log -L cmsLogService
+split
+focus
+screen -t ranking -L cmsRankingWebServer

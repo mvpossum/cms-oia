@@ -1,8 +1,0 @@
-#!/bin/bash
-set -x verbose
-dstdir=state_save
-#rm -rf $dstdir #allow overwrite
-cmsContestExporter $dstdir
-chmod -R a+rwx $dstdir/*
-exit 0
-

@@ -1,9 +1,0 @@
-#!/bin/bash
-set -x verbose
-loaddir=state_save
-options=''
-#options+='-d ' #drop other contests
-#options+='--no-submissions ' # discard submissions, tokens, user tests
-cmsContestImporter $options $loaddir
-exit 0
-

@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x verbose
+set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #ranking
 rm -r /var/local/lib/cms/ranking/* || exit 1
