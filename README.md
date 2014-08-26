@@ -1,7 +1,7 @@
 Contest Management System (Modified for OIA)
 =========================
 
-Homepage: <http://cms-dev.github.io/>
+Main project homepage: <http://cms-dev.github.io/>
 
 Introduction
 ------------
@@ -23,8 +23,9 @@ Changes done
 - Added spanish translations.
 - Users & problems name special codification
 - Scoreboard separated by levels.
-- Added a few util_scripts (probably you'll have to modify them, so read first)
+- Added a few util_scripts (probably you'll have to modify, so read them first)
 - The score shown in the scoreboard is the max between all the submissions.
+- cmsImporter modified to load users from csv file.
 - Other dirty changes like disabling Testing, hiding some texts, etc.
 
 
@@ -57,7 +58,7 @@ N3travellingsalesman
 Scoreboard
 ------------
 It has three tabs for each level.
-In order to get school icons(team's flag) working you should try to follow the 'install_all' script.
+In order to get school icons(team's flag) working you should try to follow the 'util_scripts/reset_ranking' script.
 
 
 
