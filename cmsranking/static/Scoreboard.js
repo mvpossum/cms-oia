@@ -36,7 +36,7 @@ var Scoreboard = new function () {
 
 
     self.generate = function (lvl) {
-		this.niv=niv;
+		self.niv=lvl;
         self.tcols_el.html(self.make_cols(lvl));
         self.thead_el.html(self.make_head(lvl));
 
@@ -311,7 +311,7 @@ var Scoreboard = new function () {
             }
             list[i] = user;
             user["index"] = i;
-            if (niv==user["key"][0]){
+            if (self.niv==user["key"][0]){
                 if (i == 0) {
                     self.tbody_el.prepend(user["row"]);
                 } else {
@@ -329,7 +329,7 @@ var Scoreboard = new function () {
             list[i] = user;
             user["index"] = i;
 
-            if (niv==user["key"][0]){
+            if (self.niv==user["key"][0]){
                 if (i == list_l-1) {
                     self.tbody_el.append(user["row"]);
                 } else {
@@ -404,7 +404,7 @@ var Scoreboard = new function () {
 
     // This callback is called by the DataStore when a user changes score.
     self.score_handler = function (u_id, user, t_id, task, delta) {
-		if(user["key"][0]==niv){
+		if(user["key"][0]==self.niv){
             var $row = $(user["row"]);
     
             // TODO improve this method: avoid walking over all cells
@@ -437,7 +437,7 @@ var Scoreboard = new function () {
 
         self.move_user(user);
 
-		if(user["key"][0]==niv){
+		if(user["key"][0]==self.niv){
             // Restart CSS animation
             $row.removeClass("score_up score_down");
             if (delta > 0) {
@@ -451,9 +451,11 @@ var Scoreboard = new function () {
 
     // This callback is called by the DataStore when a user changes rank.
     self.rank_handler = function (u_id, user) {
-        var $row = $(user["row"]);
+		if(user["key"][0]==self.niv){
+            var $row = $(user["row"]);
 
-        $row.children("td.rank").text(user["rank"]);
+            $row.children("td.rank").text(user["rank"]);
+        }
     };
 
 
