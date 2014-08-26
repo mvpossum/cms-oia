@@ -13,6 +13,7 @@ if [ "$#" -ge 2 ]; then
     #sudo iptables -D TCP 1 || exit 1 #elimina la regla 1
     sudo iptables -A TCP -p tcp -m tcp -s $2 --dport 8890 -j ACCEPT || exit 1
     sudo iptables -A TCP -p tcp -m tcp -s $2 --dport 8637 -j ACCEPT || exit 1
+    sudo iptables -A TCP -p tcp -m tcp -s $2 --dport 8080 -j ACCEPT || exit 1
 fi
 
 screen -c $DIR/start_services || exit 1

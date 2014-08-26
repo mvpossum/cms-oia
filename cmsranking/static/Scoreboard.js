@@ -404,7 +404,7 @@ var Scoreboard = new function () {
 
     // This callback is called by the DataStore when a user changes score.
     self.score_handler = function (u_id, user, t_id, task, delta) {
-		if(user["key"]==niv[0]){
+		if(user["key"][0]==niv){
             var $row = $(user["row"]);
     
             // TODO improve this method: avoid walking over all cells
@@ -437,7 +437,7 @@ var Scoreboard = new function () {
 
         self.move_user(user);
 
-		if(user["key"]==niv[0]){
+		if(user["key"][0]==niv){
             // Restart CSS animation
             $row.removeClass("score_up score_down");
             if (delta > 0) {
