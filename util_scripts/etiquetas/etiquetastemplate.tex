@@ -1,0 +1,20 @@
+%Autor: Martín Villagra
+\documentclass[11pt,a4paper]{article}
+\usepackage[spanish, activeacute]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{array}
+\usepackage{longtable}
+\usepackage{tabu}
+\usepackage[margin=10pt]{geometry}
+\setlength{\tabcolsep}{20pt}
+\def\certamen{Regional Santa Fe 2014}
+\newcommand\user[3]{
+ \LARGE{\centering{\textsc{\certamen}}} & \large{Usuario:} & \large{#2}\\[5pt]
+  \LARGE{\centering{\textbf{#1}}} & \large{Contraseña:} & \large{#3}\\[18pt]
+}
+\pagestyle{empty}
+\begin{document}
+\begin{longtable}{>{\centering\arraybackslash}p{12cm} | r >{\raggedleft\arraybackslash}r }
+%USERS WILL GO HERE%
+\end{longtable}
+\end{document}
