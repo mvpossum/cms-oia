@@ -1,10 +1,12 @@
 #!/usr/bin/python
 import sys
+import os
+import os.path
 import csv
+path=os.path.dirname(__file__)
 
-with open ("etiquetastemplate.tex", "r") as template:
+with open (os.path.join(path, "etiquetastemplate.tex"), "r") as template:
     output=template.read()
-
 users=""
 reader=csv.DictReader(sys.stdin)
 for row in reader:
