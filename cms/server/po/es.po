@@ -758,7 +758,7 @@ msgid ""
 "languages."
 msgstr ""
 "El enunciado para este problema está disponible en múltiples versiones, "
-"en diferentes lenguajes"
+"en diferentes lenguajes."
 
 msgid "You can see (and download) all of them using the list on the right."
 msgstr "Puedes ver (y descargar) todos ellos usando la lista a la derecha."
