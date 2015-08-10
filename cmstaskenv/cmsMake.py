@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 # Contest Management System - http://cms-dev.github.io/
-# Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
+# Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
 # Copyright © 2010-2012 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2013 Luca Wehrstedt <luca.wehrstedt@gmail.com>
-# Copyright © 2014 Luca Versari <veluca93@gmail.com>
+# Copyright © 2014-2015 Luca Versari <veluca93@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -35,11 +35,13 @@ import functools
 import shutil
 import tempfile
 import yaml
+import logging
 
 from cms import utf8_decoder
 from cms.grading import get_compilation_commands
 from cmstaskenv.Test import test_testcases, clean_test_env
-
+from cmscommon.terminal import move_cursor, add_color_to_string, \
+    colors, directions
 
 SOL_DIRNAME = 'sol'
 SOL_FILENAME = 'soluzione'
@@ -59,6 +61,7 @@ GEN_BASENAME = 'generatore'
 GEN_EXTS = ['.py', '.sh', '.cpp', '.c', '.pas']
 VALIDATOR_BASENAME = 'valida'
 GRAD_BASENAME = 'grader'
+STUB_BASENAME = 'stub'
 INPUT_DIRNAME = 'input'
 OUTPUT_DIRNAME = 'output'
 RESULT_DIRNAME = 'result'
@@ -66,12 +69,13 @@ RESULT_DIRNAME = 'result'
 DATA_DIRS = [os.path.join('.', 'cmstaskenv', 'data'),
              os.path.join('/', 'usr', 'local', 'share', 'cms', 'cmsMake')]
 
+logger = logging.getLogger()
+
 
 def detect_data_dir():
     for _dir in DATA_DIRS:
         if os.path.exists(_dir):
             return os.path.abspath(_dir)
-
 
 DATA_DIR = detect_data_dir()
 
@@ -92,8 +96,8 @@ def basename2(string, suffixes):
     try:
         idx = map(lambda x: string.endswith(x), suffixes).index(True)
     except ValueError:
-        return None
-    return (string[:-len(suffixes[idx])], string[-len(suffixes[idx]):])
+        return None, None
+    return string[:-len(suffixes[idx])], string[-len(suffixes[idx]):]
 
 
 def call(base_dir, args, stdin=None, stdout=None, stderr=None, env=None):
@@ -140,7 +144,7 @@ def detect_task_type(base_dir):
         any(filter(lambda x: x.startswith(GRAD_BASENAME + '.'),
                    os.listdir(sol_dir)))
     stub_present = os.path.exists(sol_dir) and \
-        any(filter(lambda x: x.startswith('stub.'),
+        any(filter(lambda x: x.startswith(STUB_BASENAME + '.'),
                    os.listdir(sol_dir)))
     cor_present = os.path.exists(check_dir) and \
         any(filter(lambda x: x.startswith('correttore.'),
@@ -186,6 +190,8 @@ def build_sols_list(base_dir, task_type, in_out_files, yaml_conf):
         # Ignore things known to be auxiliary files
         if exe == os.path.join(SOL_DIRNAME, GRAD_BASENAME):
             continue
+        if exe == os.path.join(SOL_DIRNAME, STUB_BASENAME):
+            continue
         if lang == 'pas' and exe.endswith('lib'):
             continue
 
@@ -196,13 +202,17 @@ def build_sols_list(base_dir, task_type, in_out_files, yaml_conf):
                 task_type == ['Batch', 'GradComp']:
             srcs.append(os.path.join(SOL_DIRNAME,
                                      GRAD_BASENAME + '.%s' % (lang)))
+        if task_type == ['Communication', '']:
+            srcs.append(os.path.join(SOL_DIRNAME,
+                                     STUB_BASENAME + '.%s' % (lang)))
         srcs.append(src)
 
-        test_deps = \
-            [exe_EVAL, os.path.join(TEXT_DIRNAME, TEXT_PDF)] + in_out_files
+        test_deps = [exe_EVAL] + in_out_files
         if task_type == ['Batch', 'Comp'] or \
                 task_type == ['Batch', 'GradComp']:
             test_deps.append('cor/correttore')
+        if task_type == ['Communication', '']:
+            test_deps.append('cor/manager')
 
         def compile_src(srcs, exe, for_evaluation, lang, assume=None):
             if lang != 'pas' or len(srcs) == 1:
@@ -213,6 +223,7 @@ def build_sols_list(base_dir, task_type, in_out_files, yaml_conf):
                     for_evaluation=for_evaluation)
                 for command in compilation_commands:
                     call(base_dir, command)
+                    move_cursor(directions.UP, erase=True, stream=sys.stderr)
 
             # When using Pascal with graders, file naming conventions
             # require us to do a bit of trickery, i.e., performing the
@@ -238,6 +249,7 @@ def build_sols_list(base_dir, task_type, in_out_files, yaml_conf):
                     for_evaluation=for_evaluation)
                 for command in compilation_commands:
                     call(tempdir, command)
+                    move_cursor(directions.UP, erase=True, stream=sys.stderr)
                 shutil.copyfile(os.path.join(tempdir, new_exe),
                                 os.path.join(base_dir, exe))
                 shutil.copymode(os.path.join(tempdir, new_exe),
@@ -245,7 +257,11 @@ def build_sols_list(base_dir, task_type, in_out_files, yaml_conf):
                 shutil.rmtree(tempdir)
 
         def test_src(exe, lang, assume=None):
-            print("Testing solution %s" % (exe))
+            # Solution names begin with sol/ and end with _EVAL, we strip that
+            print(
+                "Testing solution",
+                add_color_to_string(exe[4:-5], colors.BLACK, bold=True)
+            )
             test_testcases(
                 base_dir,
                 exe,
@@ -312,17 +328,46 @@ def build_text_list(base_dir, task_type):
     if os.path.exists(text_tex):
         actions.append(([text_tex], [text_pdf, text_aux, text_log],
                         make_pdf, 'compile to PDF'))
+
     return actions
 
 
 def iter_GEN(name):
     st = 0
-    for l in io.open(name, "rt", encoding="utf-8"):
-        if l[:4] == "#ST:":
-            st += 1
-        l = (" " + l).split("#")[0][1:].strip("\n")
-        if l != "":
-            yield (l, st)
+    for line in io.open(name, "rt", encoding="utf-8"):
+        line = line.strip()
+        splitted = line.split('#', 1)
+
+        if len(splitted) == 1:
+            # This line represents a testcase, otherwise
+            # it's just a blank
+            if splitted[0] != '':
+                yield (False, splitted[0], st)
+
+        else:
+            testcase, comment = splitted
+            testcase = testcase.strip()
+            comment = comment.strip()
+            testcase_detected = testcase != ''
+            copy_testcase_detected = comment.startswith("COPY:")
+            subtask_detected = comment.startswith('ST:')
+
+            flags = [testcase_detected,
+                     copy_testcase_detected,
+                     subtask_detected]
+            if len([x for x in flags if x]) > 1:
+                raise Exception("No testcase and command in"
+                                " the same line allowed")
+
+            if testcase_detected:
+                yield (False, testcase, st)
+
+            if copy_testcase_detected:
+                yield (True, comment[5:].strip(), st)
+
+            # This line starts a new subtask
+            if subtask_detected:
+                st += 1
 
 
 def build_gen_list(base_dir, task_type):
@@ -352,8 +397,11 @@ def build_gen_list(base_dir, task_type):
 
     sol_exe = os.path.join(SOL_DIRNAME, SOL_FILENAME)
 
-    # Count non-trivial lines in GEN
-    testcase_num = len(list(iter_GEN(os.path.join(base_dir, gen_GEN))))
+    # Count non-trivial lines in GEN and establish which external
+    # files are needed for input generation
+    testcases = list(iter_GEN(os.path.join(base_dir, gen_GEN)))
+    testcase_num = len(testcases)
+    copy_files = [x[1] for x in testcases if x[0]]
 
     def compile_src(src, exe, lang, assume=None):
         if lang in ['cpp', 'c', 'pas']:
@@ -372,7 +420,7 @@ def build_gen_list(base_dir, task_type):
     # usually generating inputs is a pretty long thing. Answer:
     # because cmsMake architecture, which is based on file timestamps,
     # doesn't make us able to understand which lines of gen/GEN have
-    # been changed. Douch! We'll have to thing better this thing for
+    # been changed. Douch! We'll have to think better this thing for
     # the new format we're developing.
     def make_input(assume=None):
         n = 0
@@ -380,31 +428,56 @@ def build_gen_list(base_dir, task_type):
             os.makedirs(input_dir)
         except OSError:
             pass
-        for (line, st) in iter_GEN(os.path.join(base_dir, gen_GEN)):
-            print("Generating input # %d" % (n), file=sys.stderr)
-            with io.open(os.path.join(input_dir,
-                                      'input%d.txt' % (n)), 'wb') as fout:
-                call(base_dir,
-                     [gen_exe] + line.split(),
-                     stdout=fout)
-            command = [validator_exe, os.path.join(input_dir,
-                                                   'input%d.txt' % (n))]
+        for (is_copy, line, st) in testcases:
+            print(
+                "Generating",
+                add_color_to_string("input # %d" % n, colors.BLACK,
+                                    stream=sys.stderr, bold=True),
+                file=sys.stderr
+            )
+            new_input = os.path.join(input_dir, 'input%d.txt' % (n))
+            if is_copy:
+                # Copy the file
+                print("> Copy input file from:", line)
+                copy_input = os.path.join(base_dir, line)
+                shutil.copyfile(copy_input, new_input)
+            else:
+                # Call the generator
+                with io.open(new_input, 'wb') as fout:
+                    call(base_dir,
+                         [gen_exe] + line.split(),
+                         stdout=fout)
+            command = [validator_exe, new_input]
             if st != 0:
                 command.append("%s" % st)
             call(base_dir, command)
             n += 1
+            for i in xrange(3):
+                move_cursor(directions.UP, erase=True, stream=sys.stderr)
 
     def make_output(n, assume=None):
         try:
             os.makedirs(output_dir)
         except OSError:
             pass
-        print("Generating output # %d" % (n), file=sys.stderr)
+        print(
+            "Generating",
+            add_color_to_string("output # %d" % n, colors.BLACK,
+                                stream=sys.stderr, bold=True),
+            file=sys.stderr
+        )
         with io.open(os.path.join(input_dir,
                                   'input%d.txt' % (n)), 'rb') as fin:
             with io.open(os.path.join(output_dir,
                                       'output%d.txt' % (n)), 'wb') as fout:
-                call(base_dir, [sol_exe], stdin=fin, stdout=fout)
+                if task_type != ['Communication', '']:
+                    call(base_dir, [sol_exe], stdin=fin, stdout=fout)
+                    move_cursor(directions.UP, erase=True, stream=sys.stderr)
+                # If the task of of type Communication, then there is
+                # nothing to put in the output files
+                else:
+                    pass
+        move_cursor(directions.UP, erase=True, stream=sys.stderr)
 
     actions = []
     actions.append(([gen_src],
@@ -416,7 +489,7 @@ def build_gen_list(base_dir, task_type):
                     functools.partial(compile_src, validator_src,
                                       validator_exe, validator_lang),
                     "compile the validator"))
-    actions.append(([gen_GEN, gen_exe, validator_exe],
+    actions.append(([gen_GEN, gen_exe, validator_exe] + copy_files,
                     map(lambda x: os.path.join(INPUT_DIRNAME,
                                                'input%d.txt' % (x)),
                         range(0, testcase_num)),
@@ -643,6 +716,7 @@ def main():
 
     elif options.all:
         print("Making all targets")
+        print()
         try:
             execute_multiple_targets(base_dir, exec_tree,
                                      generated_list, debug=options.debug,
