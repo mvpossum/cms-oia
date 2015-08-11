@@ -216,10 +216,11 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
 
         logger.info("Contest parameters loaded.")
 
-        with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
-            reader = csv.DictReader(infile)
-            for row in reader:
-                    users.append(unicode(row['Username'], "utf-8"))
+        if os.path.exists(os.path.join(self.path, "users.csv")):
+            with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
+                reader = csv.DictReader(infile)
+                for row in reader:
+                        users.append(unicode(row['Username'], "utf-8"))
         
         return Contest(**args), tasks, users
 

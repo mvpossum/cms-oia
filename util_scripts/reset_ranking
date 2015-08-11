@@ -2,7 +2,7 @@
 set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #ranking
-sudo rm -r /var/local/lib/cms/ranking/* || exit 1
+sudo rm -r /var/local/lib/cms/ranking/*
 sudo cp $DIR/ranking/logo.jpg /var/local/lib/cms/ranking/logo.jpg || exit 1
 sudo cp -r $DIR/ranking/teams /var/local/lib/cms/ranking/ || exit 1
 sudo cp -r $DIR/ranking/flags /var/local/lib/cms/ranking/ || exit 1

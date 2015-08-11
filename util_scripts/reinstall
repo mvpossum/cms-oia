@@ -1,13 +1,6 @@
 #!/bin/bash
 set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-sudo pacman -S python2-setuptools python2-tornado python2-psycopg2 \
-     python2-sqlalchemy python2-psutil python2-netifaces python2-crypto \
-     python2-pytz python2-six python2-beautifulsoup3 python2-mechanize \
-     python2-mock python2-requests python2-werkzeug python2-gevent \
-     python2-coverage python2-yaml python-sphinx python2-pycups
-     
-#instalar patool-py2 a mano!
      
 #regenerate localizations
 xgettext -o po/cms.pot --language=Python --no-location \
@@ -16,15 +9,7 @@ xgettext -o po/cms.pot --language=Python --no-location \
   cms/server/contest/*.py cms/server/contest/handlers/*.py \
   cms/server/contest/templates/*.html || exit 1
 
-#build n install
-./setup.py build || exit 1
-sudo ./setup.py install || exit 1
-
 #postgres
 sudo cp $DIR/conf/pg_hba.conf $DIR/conf/postgresql.conf /var/lib/postgres/data/ || exit 1
-#cmsconf
-sudo cp $DIR/conf/cms.conf $DIR/conf/cms.ranking.conf /usr/local/etc/ || exit 1
-sudo chown $USER /usr/local/etc/cms.conf || exit 1
-sudo chown $USER /usr/local/etc/cms.ranking.conf || exit 1
 
 $DIR/reset_ranking || exit 1
