@@ -212,25 +212,15 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
         tasks = load(conf, None, ["tasks", "problemi"])
 
         users = load(conf, None, ["users", "utenti"])
-        users = (user['username'] for user in users)
+        users = [user['username'] for user in users]
 
         logger.info("Contest parameters loaded.")
 
-        tasks = load(conf, None, ["tasks", "problemi"])
-        self.tasks_order = dict((name, num)
-                                for num, name in enumerate(tasks))
-        self.users_conf = dict((user['username'], user)
-                               for user
-                               in load(conf, None, ["users", "utenti"]))
-
-        translation={'Nombre':'first_name', 'Apellido':'last_name', 'Username':'username', 'Password':'password'}
         with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
             reader = csv.DictReader(infile)
             for row in reader:
-                   self.users_conf[row['Username']]={translation[key]:unicode(row[key], "utf-8") for key in ('Nombre','Apellido', 'Username', 'Password')}
-       
-        users = self.users_conf.keys()
-
+                    users.append(unicode(row['Username'], "utf-8"))
+        
         return Contest(**args), tasks, users
 
     def task_has_changed(self):
@@ -319,7 +309,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
         """See docstring in class Loader.
 
         """
-
         if not os.path.exists(os.path.join(os.path.dirname(self.path),
                                            "contest.yaml")):
             logger.critical("File missing: \"contest.yaml\"")
@@ -335,7 +324,15 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
         args = {}
 
         conf = load(conf, None, ["users", "utenti"])
-
+        
+        if os.path.exists(os.path.join(os.path.dirname(self.path),
+                                           "users.csv")):
+            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password'}
+            with open(os.path.join(os.path.dirname(self.path), "users.csv"), mode='rb') as infile:
+                reader = csv.DictReader(infile)
+                for row in reader:
+                    conf.append({translation[key]:unicode(row[key], "utf-8") for key in ('Nombre','Apellido', 'Username', 'Password')})
+       
         for user in conf:
             if user["username"] == username:
                 conf = user
@@ -356,7 +353,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
             args["last_name"] = args["username"]
 
         logger.info("User parameters loaded.")
-
+    
         return User(**args)
 
     def get_task(self, get_statement=True):

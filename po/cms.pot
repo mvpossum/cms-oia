@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-06-07 12:47+0200\n"
+"POT-Creation-Date: 2015-08-10 23:15-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -297,6 +297,12 @@ msgstr[1] ""
 msgid "You have no limitations on how you use them."
 msgstr ""
 
+msgid "Question too big!"
+msgstr ""
+
+msgid "You have reached the question length limit."
+msgstr ""
+
 msgid "Question received"
 msgstr ""
 
@@ -566,9 +572,6 @@ msgstr ""
 msgid "Documentation"
 msgstr ""
 
-msgid "Testing"
-msgstr ""
-
 msgid "Printing"
 msgstr ""
 
@@ -758,12 +761,6 @@ msgid "Time limit"
 msgstr ""
 
 msgid "Memory limit"
-msgstr ""
-
-msgid "Type"
-msgstr ""
-
-msgid "Files"
 msgstr ""
 
 msgid "Tokens"
@@ -983,6 +980,9 @@ msgstr ""
 msgid "Score"
 msgstr ""
 
+msgid "Files"
+msgstr ""
+
 msgid "Token"
 msgstr ""
 
@@ -993,6 +993,9 @@ msgid "Submission details"
 msgstr ""
 
 msgid "Close"
+msgstr ""
+
+msgid "Testing"
 msgstr ""
 
 msgid "Submit a test"

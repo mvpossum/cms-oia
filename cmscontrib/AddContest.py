@@ -62,12 +62,13 @@ class ContestImporter(BaseImporter):
 
     """
 
-    def __init__(self, path, test, zero_time, user_number, import_tasks,
+    def __init__(self, path, test, zero_time, user_number, import_tasks, import_users,
                  update_contest, update_tasks, no_statements, loader_class):
         self.test = test
         self.zero_time = zero_time
         self.user_number = user_number
         self.import_tasks = import_tasks
+        self.import_users = import_users
         self.update_contest = update_contest
         self.update_tasks = update_tasks
         self.no_statements = no_statements
@@ -156,11 +157,21 @@ class ContestImporter(BaseImporter):
                 user = session.query(User) \
                               .filter(User.username == username).first()
                 if user is None:
-                    # FIXME: it would be nice to automatically try to
-                    # import.
-                    logger.critical("User \"%s\" not found in database.",
-                                    username)
-                    return
+                    if self.import_users:
+                        user = self.loader.get_task_loader(username).get_user(
+                            )
+                        if user:
+                            session.add(user)
+                        else:
+                            logger.critical("Could not import user \"%s\".",
+                                            username)
+                            return
+                    else:
+                        # FIXME: it would be nice to automatically try to
+                        # import.
+                        logger.critical("User \"%s\" not found in database.",
+                                        username)
+                        return
                 # We should tie this user to a new contest
                 # FIXME: there is no way for the loader to specify
                 # hidden users
@@ -222,6 +233,11 @@ def main():
         help="import tasks if they do not exist"
     )
     parser.add_argument(
+        "-r", "--import-users",
+        action="store_true",
+        help="import users if they do not exist"
+    )
+    parser.add_argument(
         "-u", "--update-contest",
         action="store_true",
         help="update an existing contest"
@@ -256,6 +272,7 @@ def main():
         zero_time=args.zero_time,
         user_number=args.user_number,
         import_tasks=args.import_tasks,
+        import_users=args.import_users,
         update_contest=args.update_contest,
         update_tasks=args.update_tasks,
         no_statements=args.no_statements,

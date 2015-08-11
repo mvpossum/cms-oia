@@ -2,11 +2,11 @@
 set -x
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 #regenerate localizations
-xgettext -o cms/server/po/messages.pot --language=Python --no-location \
+xgettext -o po/cms.pot --language=Python --no-location \
   --keyword=_:1,2 --keyword=N_ --keyword=N_:1,2 --width=79 \
   cms/grading/*.py cms/grading/*/*.py cms/server/*.py \
-  cms/server/templates/admin/*.html \
-  cms/server/templates/contest/*.html || exit 1
+  cms/server/contest/*.py cms/server/contest/handlers/*.py \
+  cms/server/contest/templates/*.html || exit 1
 
 #build n install
 ./setup.py build || exit 1
@@ -15,10 +15,11 @@ sudo ./setup.py install || exit 1
 #postgres
 sudo cp $DIR/conf/pg_hba.conf $DIR/conf/postgresql.conf /var/lib/postgres/data/ || exit 1
 #cmsconf
-cp $DIR/conf/cms.conf $DIR/conf/cms.ranking.conf /usr/local/etc/ || exit 1
-
+sudo cp $DIR/conf/cms.conf $DIR/conf/cms.ranking.conf /usr/local/etc/ || exit 1
+sudo chown $USER /usr/local/etc/cms.conf || exit 1
+sudo chown $USER /usr/local/etc/cms.ranking.conf || exit 1
 #ranking
-rm -r /var/local/lib/cms/ranking/*
-cp $DIR/ranking/logo.jpg /var/local/lib/cms/ranking/logo.jpg || exit 1
-cp -r $DIR/ranking/teams /var/local/lib/cms/ranking/ || exit 1
-cp -r $DIR/ranking/flags /var/local/lib/cms/ranking/ || exit 1
+sudo rm -r /var/local/lib/cms/ranking/*
+sudo cp $DIR/ranking/logo.jpg /var/local/lib/cms/ranking/logo.jpg || exit 1
+sudo cp -r $DIR/ranking/teams /var/local/lib/cms/ranking/ || exit 1
+sudo cp -r $DIR/ranking/flags /var/local/lib/cms/ranking/ || exit 1
