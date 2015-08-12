@@ -1,9 +1,0 @@
-#!/bin/bash
-set -x
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-$DIR/generatelabels.py < $1 > users.tex
-pdflatex users.tex
-rm users.log users.aux users.tex
-
-
-
