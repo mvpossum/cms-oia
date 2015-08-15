@@ -402,6 +402,8 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
             if primary_language is None:
                 primary_language = 'it'
             paths = [os.path.join(self.path, "statement", "statement.pdf"),
+                     os.path.join(self.path, "statement.pdf"),
+                     os.path.join(self.path, args["name"]+".pdf"),
                      os.path.join(self.path, "testo", "testo.pdf")]
             for path in paths:
                 if os.path.exists(path):
