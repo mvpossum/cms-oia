@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-08-11 00:30-0300\n"
+"POT-Creation-Date: 2015-08-18 23:42-0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,25 @@ msgstr ""
 "Content-Type: text/plain; charset=CHARSET\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#, python-format
+msgid "Subtask %d"
+msgstr ""
+
+msgid "Outcome"
+msgstr ""
+
+msgid "Details"
+msgstr ""
+
+msgid "Execution time"
+msgstr ""
+
+msgid "Memory used"
+msgstr ""
+
+msgid "N/A"
+msgstr ""
 
 msgid "Compilation succeeded"
 msgstr ""
@@ -120,25 +139,6 @@ msgstr ""
 
 msgid ""
 "Your submission failed because it exited with a return code different from 0."
-msgstr ""
-
-msgid "N/A"
-msgstr ""
-
-#, python-format
-msgid "Subtask %d"
-msgstr ""
-
-msgid "Outcome"
-msgstr ""
-
-msgid "Details"
-msgstr ""
-
-msgid "Execution time"
-msgstr ""
-
-msgid "Memory used"
 msgstr ""
 
 msgid "Not correct"

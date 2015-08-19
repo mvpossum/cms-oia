@@ -16,19 +16,26 @@ xgettext -o po/cms.pot --language=Python --no-location \
 #install postgres
 sudo pacman -U postgresql
 sudo -i -u postgres
-sudo mkdir /var/lib/postgres/data
 initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
+
+#postgres config
+sudo cp conf/pg_hba.conf conf/postgresql.conf /var/lib/postgres/data/
+
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
 
-#postgres config
-sudo cp $DIR/conf/pg_hba.conf $DIR/conf/postgresql.conf /var/lib/postgres/data/
-
 #setup database
-sudo usermod -a -G cmsuser $USER
 sudo su - postgres
 createuser cmsuser -P
 createdb -O cmsuser database
 psql database -c 'ALTER SCHEMA public OWNER TO cmsuser'
 psql database -c 'GRANT SELECT ON pg_largeobject TO cmsuser'
+sudo usermod -a -G cmsuser $USER
+
+sudo mkdir -p /var/local/cache/cms
+sudo mkdir -p /var/local/log/cms
+sudo chown oiapoli /var/local/log/cms
+sudo mkdir -p /var/local/lib/cms/ranking
+sudo chown oiapoli /var/local/lib/cms/ranking
+sudo mkdir -p /usr/local/share/locale
 
