@@ -1,0 +1,10 @@
+#!/bin/bash
+#https://cms.readthedocs.org/en/latest/
+set -x
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+if [ "$#" -ge 1 ]; then
+    cmsDropDB || exit 1
+    cmsInitDB || exit 1
+    cmsAddContest -i -r $1 || exit 1
+fi
+sudo cmsAdminWebServer || exit 1
