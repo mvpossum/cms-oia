@@ -8,12 +8,14 @@ import random
 
 
 def genpass():
+    if len(argv)==4:
+        return argv[3]
     alphabet = "abcdefghijkmnopqrstuvwxyz23456789?."
     pw_length = 9
     return ''.join([alphabet[random.randrange(len(alphabet))] for _ in range(pw_length)])
     
-if len(argv)!=3:
-    print ("Adds usernames and passwords data\nUsage: {exe} form.csv output.csv".format(exe=argv[0]))
+if len(argv)!=3 or len(argv)!=4:
+    print ("Adds usernames and passwords data\nUsage: {exe} form.csv output.csv [password]".format(exe=argv[0]))
     exit(1)
         
 with open(argv[2], "w") as out:
