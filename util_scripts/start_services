@@ -1,3 +1,3 @@
-screen -t log -L cmsLogService
-screen -t ranking -L cmsRankingWebServer
 screen -t resources -L sudo cmsResourceService -a 1
+screen -t ranking -L cmsRankingWebServer
+screen -t log -L cmsLogService

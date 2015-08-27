@@ -40,3 +40,11 @@ sudo mkdir -p /var/local/lib/cms/ranking
 sudo chown oiapoli /var/local/lib/cms/ranking
 sudo mkdir -p /usr/local/share/locale
 
+
+#util scripts
+sudo ln -sv exception /usr/bin/cmsException
+sudo ln -sv load /usr/bin/cmsLoad
+sudo ln -sv run /usr/bin/cmsRun
+
+#example: allow port 8890
+sudo iptables -A TCP -p tcp -m tcp --dport 8890 -j ACCEPT
