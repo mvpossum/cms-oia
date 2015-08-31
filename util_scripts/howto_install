@@ -42,9 +42,17 @@ sudo mkdir -p /usr/local/share/locale
 
 
 #util scripts
-sudo ln -sv exception /usr/bin/cmsException
-sudo ln -sv load /usr/bin/cmsLoad
-sudo ln -sv run /usr/bin/cmsRun
+echo 'alias cmsLoad="~/cms-oia/util_scripts/load"'>>~/.bashrc
+echo 'alias cmsRun="~/cms-oia/util_scripts/cmsRun"'>>~/.bashrc
+echo 'alias cmsException="~/cms-oia/util_scripts/exception"'>>~/.bashrc
+echo 'alias cmsPass="~/cms-oia/util_scripts/genpass.py"'>>~/.bashrc
+echo 'alias cmsLabels="~/cms-oia/util_scripts/genlabels.py"'>>~/.bashrc
+source ~/.bashrc
 
 #example: allow port 8890
 sudo iptables -A TCP -p tcp -m tcp --dport 8890 -j ACCEPT
+
+
+#command to do all
+echo 'alias cmsWhole='\''File=Regional\ OIA\ 2015\ \(Responses\)\ -\ Form\ responses\ 1.csv; Contest=~/regional2015; cmsPass "$File" "$Contest/users.csv" && cmsLabels "$Contest/users.csv" users.tex && chromium users.pdf && cmsLoad "$Contest"'\'>>~/.bashrc
+#you only need to call cmsRun after!
