@@ -1,0 +1,65 @@
+\documentclass[11pt,a4paper]{article}
+\nofiles
+
+\usepackage[spanish, activeacute]{babel}
+\usepackage[pdftex]{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=12pt]{geometry}
+\usepackage{multicol}
+\usepackage{tikz}
+\usepackage{eso-pic}
+
+%---------------------------------------------------------------------------------------------------
+
+\def\certamen{Regional OIA Santa Fe 2015}
+
+%---------------------------------------------------------------------------------------------------
+
+\pagestyle{empty}
+
+\AddToShipoutPicture{
+	\begin{tikzpicture}
+		\draw[white] (0,0) rectangle (0,0); % setear origen
+		\draw[thin] (12.25,0) rectangle (12.25,30);
+	\end{tikzpicture}
+}
+
+\setlength{\parindent}{0cm}
+\setlength{\columnsep}{24pt}
+\setlength{\columnseprule}{0pt}
+\setlength{\tabcolsep}{20pt}
+
+\def\espacio{\vspace*{0pt}}
+\def\linea{\espacio \\ \rule{\textwidth}{0.1pt} \espacio \\}
+
+\newcommand\user[4]{--Args= Nombre y apellido, nivel, usuario, contraseña
+	\begin{minipage}[c]{0.58\textwidth}
+		\centering \Huge
+		\textbf{#1}\\
+		\vspace{10pt}
+		\textbf{Nivel #2}
+	\end{minipage}
+	\hspace{20pt}
+	\begin{minipage}[c]{0.38\textwidth}
+		\centering
+		{\Large
+		\textsc{\certamen}\\
+		\vspace{6pt}
+		\textbf{#1}\\
+		}
+		\vspace{20pt}
+		\begin{tabular}{ll}\large
+			Usuario:		&	#3	\\
+			Contraseña:	&	#4	\\
+		\end{tabular}
+	\end{minipage}\\
+	\linea
+}
+
+%---------------------------------------------------------------------------------------------------
+
+\begin{document}
+
+%USERS_WILL_GO_HERE%
+
+\end{document}
