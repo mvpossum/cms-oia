@@ -625,7 +625,11 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
             args["score_type"] = "Sum"
             total_value = float(conf.get("total_value", 100.0))
             input_value = 0.0
-            n_input = int(conf['n_input'])
+            if 'n_input' in conf:
+                n_input = int(conf['n_input'])
+            else:
+                _, _, files = os.walk(os.path.join(self.path, "input")).next()
+                n_input = len(files)
             if n_input != 0:
                 input_value = total_value / n_input
             args["score_type_parameters"] = "%s" % input_value
@@ -695,7 +699,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
                 os.path.join(self.path, "output", "output%d.txt" % i),
                 "Output %d for task %s" % (i, name))
             args["testcases"] += [
-                Testcase("%03d" % i, False, input_digest, output_digest)]
+                Testcase("%03d" % i, not "public_testcases" in conf, input_digest, output_digest)]
             if args["task_type"] == "OutputOnly":
                 task.attachments += [
                     Attachment("input_%03d.txt" % i, input_digest)]
