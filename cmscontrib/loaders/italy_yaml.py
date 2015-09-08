@@ -153,7 +153,10 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
 
         args = {}
 
-        load(conf, args, ["name", "nome_breve"])
+        if not "name" in conf and not "nome_breve" in conf:
+            args["name"]=name
+        else:
+            load(conf, args, ["name", "nome_breve"])
         load(conf, args, ["description", "nome"])
 
         # Contest directory == Contest name
@@ -208,8 +211,14 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
         load(conf, args, "max_user_test_number")
         load(conf, args, "min_submission_interval", conv=make_timedelta)
         load(conf, args, "min_user_test_interval", conv=make_timedelta)
-
-        tasks = load(conf, None, ["tasks", "problemi"])
+        load(conf, args, "restrict_level")
+        load(conf, args, "enable_categories")
+        load(conf, args, "show_time")
+        
+        if not "tasks" in conf and not "problemi" in conf:
+            tasks = [name  for name in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, name, "task.yaml")) ]
+        else:
+            tasks = load(conf, None, ["tasks", "problemi"])
 
         users = load(conf, None, ["users", "utenti"])
         users = [user['username'] for user in users]
@@ -387,16 +396,23 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader):
         touch(os.path.join(self.path, ".import_error"))
 
         args = {}
-
-        load(conf, args, ["name", "nome_breve"])
-        load(conf, args, ["title", "nome"])
+        if not "name" in conf and not "nome_breve" in conf:
+            args["name"]=name
+        else:
+            load(conf, args, ["name", "nome_breve"])
+            
+        if not "title" in conf and not "nome" in conf:
+            args["title"]=name
+        else:
+            load(conf, args, ["title", "nome"])
 
         assert name == args["name"]
-
-        if args["name"] == args["title"]:
-            logger.warning("Short name equals long name (title). "
-                           "Please check.")
-
+        
+        if not "category" in conf:
+            args["category"]=""
+        else:
+            load(conf, args, "category")
+        
         if get_statement:
             primary_language = load(conf, None, "primary_language")
             if primary_language is None:

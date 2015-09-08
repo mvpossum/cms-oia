@@ -1,0 +1,32 @@
+/* Minimal css for clickable pure CSS collapsible tree menu */
+/* As specific as possible to prevent interference with other code */
+
+#menutree li {
+   list-style: none;          /* all list item li dots invisible */
+   
+         }
+    
+   li .menu_label + input[type=checkbox] {
+      opacity: 0;             /* checkboxes invisible and use no space */
+      position: absolute;
+      top: -9999px;
+      left: -9999px;
+     }                        /* display: none; is better but fails in ie8 */
+
+    li .menu_label {
+      cursor: pointer;        /* cursor changes when you mouse over this class */
+    }                         /* could add the many user-select: none; commands here */
+
+      li .menu_label + input[type=checkbox] + ol > li
+         {
+            display: none;         /* prevents sublists below unchecked labels from displaying */
+         }
+
+      li .menu_label + input[type=checkbox]:checked + ol
+         {
+           margin-bottom:20px;
+         }
+      li .menu_label + input[type=checkbox]:checked + ol > li
+         {
+           display: block;         /* display submenu on click */
+         }

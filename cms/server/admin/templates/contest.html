@@ -112,6 +112,24 @@
       <td>The number of decimal places the scores will be rounded to</td>
       <td><input type="text" name="score_precision" value="{{ contest.score_precision }}"></td>
     </tr>
+    <tr>
+      <td><label for="restrict_level">Users see only the problems on their level</label></td>
+      <td>
+        <input type="checkbox" id="restrict_level" name="restrict_level" {{ "checked" if contest.restrict_level else "" }}/>
+      </td>
+    </tr>
+    <tr>
+      <td><label for="categories_enabled">Enable categories</label></td>
+      <td>
+        <input type="checkbox" id="categories_enabled" name="categories_enabled" {{ "checked" if contest.categories_enabled else "" }}/>
+      </td>
+    </tr>
+    <tr>
+      <td><label for="show_time">Show time left to participants</label></td>
+      <td>
+        <input type="checkbox" id="show_time" name="show_time" {{ "checked" if contest.show_time else "" }}/>
+      </td>
+    </tr>
   </table>
   <input type="submit" value="Update">
   <input type="reset" value="Reset">

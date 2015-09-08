@@ -167,7 +167,7 @@
     <tbody>
 {% set extensions = "[%s]" %  ("|".join(LANGUAGE_TO_SOURCE_EXT_MAP[lang][1:] for lang in contest.languages)) %}
 {% for t_iter in contest.tasks %}
-    {% if current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" %}
+    {% if not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x" %}
         <tr>
             <th>{{ t_iter.name }}</th>
             <td>{{ t_iter.title }}</td>

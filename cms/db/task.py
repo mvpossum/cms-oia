@@ -212,6 +212,10 @@ class Task(Base):
         # DELETE query) to set (and unset) the column associated to
         # this relationship.
         post_update=True)
+        
+    category = Column(
+        Unicode,
+        nullable=False)
 
     # Follows the description of the fields automatically added by
     # SQLAlchemy.

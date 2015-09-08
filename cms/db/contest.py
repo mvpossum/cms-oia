@@ -198,6 +198,21 @@ class Contest(Base):
         nullable=False,
         default=0)
 
+    restrict_level = Column(
+        Boolean,
+        nullable=False,
+        default=False)
+        
+    categories_enabled = Column(
+        Boolean,
+        nullable=False,
+        default=False)
+        
+    show_time = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
     # Follows the description of the fields automatically added by
     # SQLAlchemy.
     # tasks (list of Task objects)

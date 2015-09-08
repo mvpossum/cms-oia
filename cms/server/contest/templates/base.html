@@ -20,6 +20,7 @@
         <script type="text/javascript" src="{{ url_root }}/static/cws_utils.js"></script>
         <link rel="stylesheet" href="{{ url_root }}/static/css/bootstrap.css">
         <link rel="stylesheet" href="{{ url_root }}/static/cws_style.css">
+        <link rel="stylesheet" href="{{ url_root }}/static/css/menutree.css">
 
         <title>{{ contest.description }}</title>
 
@@ -123,6 +124,8 @@ $(document).ready(function () {
         <div style="display: none" id="translation_unread">
             {{ _("%d unread") }}
         </div>
+
+{% if contest.show_time %}
         <div style="display: none" id="translation_until_contest_starts">
             {{ _("Until contest starts:") }}
         </div>
@@ -132,6 +135,7 @@ $(document).ready(function () {
         <div style="display: none" id="translation_time_left">
             {{ _("Time left:") }}
         </div>
+{% end %}
         <!-- End -->
         <div id="main" class="container">
             <div class="row">
@@ -140,10 +144,12 @@ $(document).ready(function () {
                         <span id="server_time_label">{{ _("Server time:") }}</span>
                         <span id="server_time"></span>
                     </h3>
+{% if contest.show_time %}
                     <h3 id="countdown_box">
                         <span id="countdown_label"></span>
                         <span id="countdown"></span>
                     </h3>
+{% end %}
                     <div class="well" style="padding: 8px 0;">
                         <ul class="nav nav-list">
 
@@ -162,8 +168,29 @@ $(document).ready(function () {
                                     </a>
                             </li>
     {% if actual_phase == 0 %}
-        {% for t_iter in contest.tasks %}
-            {% if current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" %}
+        {% if not contest.categories_enabled %}
+            {% for t_iter in contest.tasks %}
+                {% if not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x" %}
+                                <li class="nav-header">
+                                    {{ t_iter.name }}
+                                </li>
+                                <li{% if request.path == '/tasks/%s/description' % encode_for_url(t_iter.name) %} class="active"{% end %}>
+                                    <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
+                                </li>
+                                <li{% if request.path == '/tasks/%s/submissions' % encode_for_url(t_iter.name) %} class="active"{% end %}>
+                                    <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/submissions">{{ _("Submissions") }}</a>
+                                </li>
+                {% end %}
+            {% end %}
+        {% else %}
+            {% for cate in set([t.category for t in contest.tasks]) %}
+            {% if cate %}
+                <li>
+                <label class="menu_label nav-header" style="color: #009900;" for="{{ cate }}">{{ cate }}</label>
+                <input type="checkbox" id="{{ cate }}" />                             <!-- input must follow label for safari -->
+                <ol class="nav nav-list">
+                {% for t_iter in contest.tasks %}
+                    {% if t_iter.category==cate and (not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x") %}
                             <li class="nav-header">
                                 {{ t_iter.name }}
                             </li>
@@ -173,6 +200,10 @@ $(document).ready(function () {
                             <li{% if request.path == '/tasks/%s/submissions' % encode_for_url(t_iter.name) %} class="active"{% end %}>
                                 <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/submissions">{{ _("Submissions") }}</a>
                             </li>
+                    {% end %}
+                {% end %}
+                </ol></li>
+            {% end %}
             {% end %}
         {% end %}
     {% end %}

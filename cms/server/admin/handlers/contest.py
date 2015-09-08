@@ -84,6 +84,9 @@ class AddContestHandler(SimpleHandler("add_contest.html")):
             self.get_string(attrs, "timezone", empty=None)
             self.get_timedelta_sec(attrs, "per_user_time")
             self.get_int(attrs, "score_precision")
+            self.get_bool(attrs, "restrict_level")
+            self.get_bool(attrs, "categories_enabled")
+            self.get_bool(attrs, "show_time")
 
             # Create the contest.
             contest = Contest(**attrs)
@@ -147,6 +150,9 @@ class ContestHandler(SimpleContestHandler("contest.html")):
             self.get_string(attrs, "timezone", empty=None)
             self.get_timedelta_sec(attrs, "per_user_time")
             self.get_int(attrs, "score_precision")
+            self.get_bool(attrs, "restrict_level")
+            self.get_bool(attrs, "categories_enabled")
+            self.get_bool(attrs, "show_time")
 
             # Update the contest.
             contest.set_attrs(attrs)
