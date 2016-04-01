@@ -7,8 +7,8 @@ from subprocess import call
 import random
 
 def genpass():
-    #~ if len(argv)==4:
-        #~ return argv[3]
+    if len(argv)==4:
+        return argv[3]
     with open('wordlist.txt', 'r') as wordfile:
         words=[s.strip() for s in wordfile.read().split('\n') if s.strip()]
     pw_length = 3
