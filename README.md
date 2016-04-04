@@ -2,6 +2,7 @@ Contest Management System (Modified for OIA)
 =========================
 
 Main project homepage: <http://cms-dev.github.io/>
+Documentation: <https://cms.readthedocs.org/en/latest/>
 
 Introduction
 ------------

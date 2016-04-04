@@ -64,7 +64,11 @@ $(document).ready(function () {
 {% end %}
 {% if current_user is not None %}
                     <p class="navbar-text pull-right">
-                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username, "lvl": current_user.user.username[0]} %}
+    {% if current_user.user.username[0]=='1' or current_user.user.username[0]=='2' or current_user.user.username[0]=='3' or current_user.user.username[0]=='x' %}
+                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>, level <strong>%(lvl)s</strong>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username, "lvl": current_user.user.username[0]} %}
+    {% else %}
+                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username} %}
+    {% end %}
                         <a class="btn btn-warning" href="{{ url_root }}/logout">{{ _("Logout") }}</a>
                     </p>
 {% end %}
@@ -183,7 +187,7 @@ $(document).ready(function () {
                 {% end %}
             {% end %}
         {% else %}
-            {% for cate in set([t.category for t in contest.tasks]) %}
+            {% for cate in sorted(set([t.category for t in contest.tasks])) %}
             {% if cate %}
                 <li>
                 <label class="menu_label nav-header" style="color: #009900;" for="{{ cate }}">{{ cate }}</label>
