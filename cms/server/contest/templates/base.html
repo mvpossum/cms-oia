@@ -189,23 +189,28 @@ $(document).ready(function () {
                 {% end %}
             {% end %}
         {% else %}
+            <hr>
+            {% set actcat=(([t.category for t in contest.tasks if request.path.startswith('/tasks/%s/' % encode_for_url(t.name))])+[""])[0] %}
             {% for cate in sorted(set([t.category for t in contest.tasks])) %}
             {% if cate %}
                 <li>
-                <label class="menu_label nav-header" style="color: #009900;" for="{{ cate }}">{{ cate }}</label>
-                <input type="checkbox" id="{{ cate }}" />                             <!-- input must follow label for safari -->
+                <label class="menu_label nav-header" style="color: #0088cc;" for="{{ encode_for_url(cate) }}">{{ cate }}</label>
+                <input type="checkbox" id="{{ encode_for_url(cate) }}" {% if actcat==cate %} checked {% end %}/>                             <!-- input must follow label for safari -->
                 <ol class="nav nav-list">
                 {% for t_iter in contest.tasks %}
                     {% if t_iter.category==cate and (not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x") %}
-                            <li class="nav-header">
-                                {{ t_iter.name }}
-                            </li>
-                            <li{% if request.path == '/tasks/%s/description' % encode_for_url(t_iter.name) %} class="active"{% end %}>
-                                <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
-                            </li>
-                            <li{% if request.path == '/tasks/%s/submissions' % encode_for_url(t_iter.name) %} class="active"{% end %}>
-                                <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/submissions">{{ _("Submissions") }}</a>
-                            </li>
+                            <li>
+                            <label class="menu_label nav-header" for="{{ encode_for_url(t_iter.name) }}"{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} style="color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;"{% end %}>{{ t_iter.name }}</label>
+                            <input type="checkbox" id="{{ encode_for_url(t_iter.name) }}"{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} checked {% end %}/>                             <!-- input must follow label for safari -->
+                            <ol class="nav nav-list">
+
+                                <li>
+                                    <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
+                                </li>
+                                <li>
+                                    <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/submissions">{{ _("Submissions") }}</a>
+                                </li>
+                            </ol></li>
                     {% end %}
                 {% end %}
                 </ol></li>
