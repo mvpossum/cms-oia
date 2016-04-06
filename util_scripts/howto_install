@@ -6,13 +6,6 @@ exit 1
 # https://cms.readthedocs.org/en/latest/
 # https://wiki.archlinux.org/index.php/PostgreSQL
 
-#regenerate localizations
-xgettext -o po/cms.pot --language=Python --no-location \
-  --keyword=_:1,2 --keyword=N_ --keyword=N_:1,2 --width=79 \
-  cms/grading/*.py cms/grading/*/*.py cms/server/*.py \
-  cms/server/contest/*.py cms/server/contest/handlers/*.py \
-  cms/server/contest/templates/*.html
-
 #install postgres
 sudo pacman -U postgresql
 sudo -i -u postgres
@@ -32,6 +25,21 @@ createdb -O cmsuser database
 psql database -c 'ALTER SCHEMA public OWNER TO cmsuser'
 psql database -c 'GRANT SELECT ON pg_largeobject TO cmsuser'
 sudo usermod -a -G cmsuser $USER
+
+
+#prepare isolate
+git submodule update --init
+
+#regenerate localizations
+xgettext -o po/cms.pot --language=Python --no-location \
+  --keyword=_:1,2 --keyword=N_ --keyword=N_:1,2 --width=79 \
+  cms/grading/*.py cms/grading/*/*.py cms/server/*.py \
+  cms/server/contest/*.py cms/server/contest/handlers/*.py \
+  cms/server/contest/templates/*.html
+  
+#install translations and isolate
+sudo ./prerequisites.py install
+
 
 sudo mkdir -p /var/local/cache/cms
 sudo mkdir -p /var/local/log/cms
