@@ -190,19 +190,18 @@ $(document).ready(function () {
             {% end %}
         {% else %}
             <hr>
+            <div id="izqmenu">
+            <div class="accordion-group" style="border:0;padding:0;margin:0">
             {% set actcat=(([t.category for t in contest.tasks if request.path.startswith('/tasks/%s/' % encode_for_url(t.name))])+[""])[0] %}
             {% for cate in sorted(set([t.category for t in contest.tasks])) %}
             {% if cate %}
-                <li>
-                <label class="menu_label nav-header" style="color: #0088cc;" for="{{ encode_for_url(cate) }}">{{ cate }}</label>
-                <input type="checkbox" id="{{ encode_for_url(cate) }}" {% if actcat==cate %} checked {% end %}/>                             <!-- input must follow label for safari -->
-                <ol class="nav nav-list">
+                <div id="C2{{ cate.replace(' ', 'x') }}">
+                <div class="menu_label nav-header" style="color: #0088cc;"><a style="cursor:pointer;" data-toggle="collapse" data-target="#C{{ cate.replace(' ', 'x') }}" data-parent="#izqmenu">{{ cate }}</a></div>
+                <div class="nav nav-list collapse{% if actcat==cate %} in{% end %} accordion-group" id="C{{ cate.replace(' ', 'x') }}" style="border:0">
                 {% for t_iter in contest.tasks %}
                     {% if t_iter.category==cate and (not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x") %}
-                            <li>
-                            <label class="menu_label nav-header" for="{{ encode_for_url(t_iter.name) }}"{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} style="color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;"{% end %}>{{ t_iter.name }}</label>
-                            <input type="checkbox" id="{{ encode_for_url(t_iter.name) }}"{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} checked {% end %}/>                             <!-- input must follow label for safari -->
-                            <ol class="nav nav-list">
+                            <div class="menu_label nav-header" style="cursor:pointer;{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %}color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;{% end %}" data-toggle="collapse" data-target="#P{{ t_iter.name.replace(' ', 'x') }}" data-parent="#C2{{ cate.replace(' ', 'x') }}">{{ t_iter.name }}</div>
+                            <ol class="nav nav-list collapse{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} in{% end %}" id="P{{ t_iter.name.replace(' ', 'x') }}">
 
                                 <li>
                                     <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
@@ -210,12 +209,15 @@ $(document).ready(function () {
                                 <li>
                                     <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/submissions">{{ _("Submissions") }}</a>
                                 </li>
-                            </ol></li>
+                            </ol>
                     {% end %}
                 {% end %}
-                </ol></li>
+                </div>
+                </div>
             {% end %}
             {% end %}
+            </div>
+            </div>
         {% end %}
     {% end %}
                             <li class="divider"></li>
