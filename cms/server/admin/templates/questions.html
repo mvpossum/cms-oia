@@ -79,11 +79,11 @@ utils.show_page("questions", 1);
           <input type="hidden" name="ref" value="/contest/{{ contest.id }}/questions"/>
           Precompiled answer:
           <select name="reply_question_quick_answer" onchange="update_additional_answer({{ msg_i }}, this);">
-            <option value="yes">Yes</option>
+            <option value="yes">Sí</option>
             <option value="no">No</option>
-            <option value="answered">Answered in task description</option>
-            <option value="invalid">Invalid question</option>
-            <option value="nocomment">No comment</option>
+            <option value="answered">Contestado en el enunciado</option>
+            <option value="invalid">Pregunta invalida</option>
+            <option value="nocomment">Sin comentario</option>
             <option selected value="other">Other</option>
           </select>
           <br/>

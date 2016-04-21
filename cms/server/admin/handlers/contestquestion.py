@@ -64,11 +64,11 @@ class QuestionReplyHandler(BaseHandler):
 
     """
     QUICK_ANSWERS = {
-        "yes": "Yes",
+        "yes": "Sí",
         "no": "No",
-        "answered": "Answered in task description",
-        "invalid": "Invalid question",
-        "nocomment": "No comment",
+        "answered": "Contestado en el enunciado",
+        "invalid": "Pregunta invalida",
+        "nocomment": "Sin comentario",
     }
 
     def post(self, contest_id, question_id):
