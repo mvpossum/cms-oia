@@ -35,13 +35,20 @@ var escapeHTML = (function() {
 
 var Scoreboard = new function () {
     var self = this;
-    var niv="1";
-    self.init = function (lvl) {
-        self.tcols_el = $('#Scoreboard_cols');
-        self.thead_el = $('#Scoreboard_head');
-        self.tbody_el = $('#Scoreboard_body');
 
-        self.generate(lvl);
+    self.init = function () {
+        self.user_list = [new Array(), new Array(), new Array(), new Array()];
+        self.tcols_el=[];
+        self.thead_el=[];
+        self.tbody_el=[];
+        for (lvl = 0; lvl < 4; lvl++) { 
+            self.tcols_el.push($('#Scoreboard_cols'+lvl));
+            self.thead_el.push($('#Scoreboard_head'+lvl));
+            self.tbody_el.push($('#Scoreboard_body'+lvl));
+        }
+        for (lvl = 0; lvl < 4; lvl++) { 
+            self.generate(lvl);
+        }
 
         DataStore.user_create.add(self.create_user);
         DataStore.user_update.add(self.update_user);
@@ -54,15 +61,14 @@ var Scoreboard = new function () {
 
 
     self.generate = function (lvl) {
-		self.niv=lvl;
-        self.tcols_el.html(self.make_cols(lvl));
-        self.thead_el.html(self.make_head(lvl));
+        self.tcols_el[lvl].html(self.make_cols(lvl));
+        self.thead_el[lvl].html(self.make_head(lvl));
 
         // Create callbacks for sorting
-        self.thead_el.on("click", "th.score", function () {
-            $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el).removeClass("sort_key");
-            $("tr td[data-sort_key=" + self.sort_key + "]", self.thead_el).removeClass("sort_key");
-            $("tr td[data-sort_key=" + self.sort_key + "]", self.tbody_el).removeClass("sort_key");
+        self.thead_el[lvl].on("click", "th.score", function () {
+            $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el[lvl]).removeClass("sort_key");
+            $("tr td[data-sort_key=" + self.sort_key + "]", self.thead_el[lvl]).removeClass("sort_key");
+            $("tr td[data-sort_key=" + self.sort_key + "]", self.tbody_el[lvl]).removeClass("sort_key");
 
             var $this = $(this);
 
@@ -74,40 +80,40 @@ var Scoreboard = new function () {
                 self.sort_key = "t_" + $this.data("task");
             }
 
-            self.sort();
+            self.sort(lvl);
 
-            $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el).addClass("sort_key");
-            $("tr td[data-sort_key=" + self.sort_key + "]", self.thead_el).addClass("sort_key");
-            $("tr td[data-sort_key=" + self.sort_key + "]", self.tbody_el).addClass("sort_key");
+            $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el[lvl]).addClass("sort_key");
+            $("tr td[data-sort_key=" + self.sort_key + "]", self.thead_el[lvl]).addClass("sort_key");
+            $("tr td[data-sort_key=" + self.sort_key + "]", self.tbody_el[lvl]).addClass("sort_key");
         });
 
         self.sort_key = "global";
-        self.user_list = new Array();
-        self.tbody_el.html("");
+        self.user_list[lvl] = new Array();
+        self.tbody_el[lvl].html("");
         self.make_body(lvl);
 
         // Set initial style
-        $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el).addClass("sort_key");
-        $("tr td[data-sort_key=" + self.sort_key + "]", self.thead_el).addClass("sort_key");
-        $("tr td[data-sort_key=" + self.sort_key + "]", self.tbody_el).addClass("sort_key");
+        $("col[data-sort_key=" + self.sort_key + "]", self.tcols_el[lvl]).addClass("sort_key");
+        $("tr td[data-sort_key=" + self.sort_key + "]", self.thead_el[lvl]).addClass("sort_key");
+        $("tr td[data-sort_key=" + self.sort_key + "]", self.tbody_el[lvl]).addClass("sort_key");
 
         // Create callbacks for selection
-        self.tbody_el.on("click", "td.sel", function () {
+        self.tbody_el[lvl].on("click", "td.sel", function () {
             DataStore.toggle_selected($(this).parent().data("user"));
         });
 
         // Create callbacks for UserPanel
-        self.tbody_el.on("click", "td.f_name, td.l_name", function () {
+        self.tbody_el[lvl].on("click", "td.f_name, td.l_name", function () {
             UserDetail.show($(this).parent().data("user"));
         });
 
         // Create callbacks for animation-end
-        self.tbody_el.on('animationend', 'tr', function(event) {
+        self.tbody_el[lvl].on('animationend', 'tr', function(event) {
             $(this).removeClass("score_up score_down");
         });
 
         // Fuck, WebKit!!
-        self.tbody_el.on('webkitAnimationEnd', 'tr', function(event) {
+        self.tbody_el[lvl].on('webkitAnimationEnd', 'tr', function(event) {
             $(this).removeClass("score_up score_down");
         });
     };
@@ -169,11 +175,14 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==lvl[0] || lvl[0]=="x"){
+				if(task["short_name"][1]==""+lvl || lvl==0){
 				    result += " \
     <col class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"/> <col/><col/>";
 		        }
             }
+
+            result += " \
+<col/> <col/><col/><col/>";
         }
 
         result += " \
@@ -202,14 +211,11 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==lvl[0] || lvl[0]=="x"){
+				if(task["short_name"][1]==""+lvl || lvl==0){
                     result += " \
         <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"] + "</abbr></th>";
 			    }
             }
-
-            result += " \
-    <th colspan=\"4\" class=\"score contest\" data-contest=\"" + c_id + "\" data-sort_key=\"c_" + c_id + "\"><abbr title=\"" + escapeHTML(contest["name"]) + "\">" + escapeHTML(contest["name"]) + "</abbr></th>";
         }
 
         result += " \
@@ -223,20 +229,23 @@ var Scoreboard = new function () {
     self.make_body = function (lvl) {
         for (var u_id in DataStore.users) {
             var user = DataStore.users[u_id];
-            if(user["key"][0] == lvl[0]){
-			    user["row"] = $(self.make_row(user, lvl))[0];
-			    self.user_list.push(user);
+            if(user["key"][0] == ""+lvl){
+			    user["row"] = $(self.make_row(user))[0];
+			    self.user_list[lvl].push(user);
 			}
         }
 
-        self.sort();
+        self.sort(lvl);
     };
 
 
-    self.make_row = function (user, lvl) {
+    self.make_row = function (user) {
+        var lvl=user["key"][0];
+        if(lvl=="x")
+            lvl=0;
         // See the comment in .make_cols() for the reason we use colspans.
         var result = " \
-<tr class=\"user\" data-user=\"" + user["key"] + "\"> \
+<tr class=\"user" + (user["selected"] > 0 ? " selected color" + user["selected"] : "") + "\" data-user=\"" + user["key"] + "\"> \
     <td class=\"sel\"></td> \
     <td class=\"rank\">" + user["rank"] + "</td> \
     <td colspan=\"10\" class=\"f_name\">" + escapeHTML(user["f_name"]) + "</td> \
@@ -259,13 +268,14 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==lvl[0] || lvl[0]=="x"){
+				if(task["short_name"][1]==""+lvl || lvl==0){
                     var score_class = self.get_score_class(user["t_" + t_id], task["max_score"]);
                     result += " \
         <td colspan=\"3\" class=\"score task " + score_class + "\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\">" + round_to_str(user["t_" + t_id], task["score_precision"]) + "</td>";
 		        }
             }
         }
+
         var score_class = self.get_score_class(user["global"], DataStore.global_max_score);
         result += " \
     <td colspan=\"5\" class=\"score global " + score_class + "\" data-sort_key=\"global\">" + round_to_str(user["global"], DataStore.global_score_precision) + "</td> \
@@ -294,7 +304,7 @@ var Scoreboard = new function () {
     // - the last name
     // - the first name
     // - the key
-    self.user_list = new Array();
+    self.user_list = [new Array(), new Array(), new Array(), new Array()];
 
 
     // Compare two users. Returns -1 if "a < b" or +1 if "a >= b"
@@ -316,7 +326,10 @@ var Scoreboard = new function () {
     // Suppose the scoreboard is correctly sorted except for the given user.
     // Move this user (up or down) to put it in his correct position.
     self.move_user = function (user) {
-        var list = self.user_list;
+        var lvl=user["key"][0];
+        if(lvl=="x")
+            lvl=0;
+        var list = self.user_list[lvl];
         var compare = self.compare_users;
 
         var list_l = list.length;
@@ -332,13 +345,12 @@ var Scoreboard = new function () {
             }
             list[i] = user;
             user["index"] = i;
-            if (self.niv==user["key"][0]){
-                if (i == 0) {
-                    self.tbody_el.prepend(user["row"]);
-                } else {
-                    self.tbody_el.children("tr.user[data-user=" + list[i-1]["key"] + "]").after(user["row"]);
-                }
-		    }
+
+            if (i == 0) {
+                self.tbody_el[lvl].prepend(user["row"]);
+            } else {
+                self.tbody_el[lvl].children("tr.user[data-user=" + list[i-1]["key"] + "]").after(user["row"]);
+            }
         } else if (i < list_l-1 && compare(list[i+1], user) == -1) {
             // Move down
 
@@ -350,20 +362,18 @@ var Scoreboard = new function () {
             list[i] = user;
             user["index"] = i;
 
-            if (self.niv==user["key"][0]){
-                if (i == list_l-1) {
-                    self.tbody_el.append(user["row"]);
-                } else {
-                    self.tbody_el.children("tr.user[data-user=" + list[i+1]["key"] + "]").before(user["row"]);
-                }
+            if (i == list_l-1) {
+                self.tbody_el[lvl].append(user["row"]);
+            } else {
+                self.tbody_el[lvl].children("tr.user[data-user=" + list[i+1]["key"] + "]").before(user["row"]);
             }
         }
     };
 
 
     // Sort the scoreboard using the column with the given index.
-    self.sort = function () {
-        var list = self.user_list;
+    self.sort = function (lvl) {
+        var list = self.user_list[lvl];
 
         list.sort(self.compare_users);
 
@@ -374,7 +384,8 @@ var Scoreboard = new function () {
             fragment.appendChild(list[idx]["row"]);
         }
 
-        self.tbody_el.append(fragment);
+        self.tbody_el[lvl].append(fragment);
+        
     };
 
 
@@ -383,11 +394,15 @@ var Scoreboard = new function () {
         var $row = $(self.make_row(user));
         $row.children("td[data-sort_key=" + self.sort_key + "]").addClass("sort_key");
 
-        user["row"] = $row[0];
-        user["index"] = self.user_list.length;
-        self.user_list.push(user);
+        var lvl=user["key"][0];
+        if(lvl=="x")
 
-        self.tbody_el.append(row);
+        user["row"] = $row[0];
+        user["index"] = self.user_list[lvl].length;
+        
+        self.user_list[lvl].push(user);
+
+        self.tbody_el[lvl].append(row);
         // The row will be at the bottom (since it has a score of zero and thus
         // the maximum rank), but we may still need to sort it due to other
         // users having that score and the sort-by-name clause.
@@ -398,24 +413,37 @@ var Scoreboard = new function () {
     // This callback is called by the DataStore when a user is updated.
     // It updates only its basic information (first name, last name and team).
     self.update_user = function (u_id, old_user, user) {
+        var lvl=old_user["key"][0];
+        if(lvl=="x")
+            lvl=0;
+            
         var $row = $(old_user["row"]);
 
         user["row"] = old_user["row"];
         user["index"] = old_user["index"];
-        self.user_list.splice(old_user["index"], 1, user);
+        self.user_list[lvl].splice(old_user["index"], 1, user);
         delete old_user["row"];
         delete old_user["index"];
 
         $row.children("td.f_name").text(user["f_name"]);
         $row.children("td.l_name").text(user["l_name"]);
+
+        if (user["team"]) {
+            $row.children(".team").html("<img src=\"" + Config.get_flag_url(user["team"]) + "\" title=\"" + DataStore.teams[user["team"]]["name"] + "\" />");
+        } else {
+            $row.children(".team").text("");
+        }
     };
 
 
     // This callback is called by the DataStore when a user is deleted.
     self.delete_user = function (u_id, old_user) {
+        var lvl=old_user["key"][0];
+        if(lvl=="x")
+            lvl=0;
         var $row = $(old_user["row"]);
 
-        self.user_list.splice(old_user["index"], 1);
+        self.user_list[lvl].splice(old_user["index"], 1);
         delete old_user["row"];
         delete old_user["index"];
 
@@ -425,58 +453,52 @@ var Scoreboard = new function () {
 
     // This callback is called by the DataStore when a user changes score.
     self.score_handler = function (u_id, user, t_id, task, delta) {
-		if(user["key"][0]==self.niv){
-            var $row = $(user["row"]);
-    
-            // TODO improve this method: avoid walking over all cells
+        var $row = $(user["row"]);
 
-            $row.children("td.score").each(function () {
-                var $this = $(this);
+        // TODO improve this method: avoid walking over all cells
 
-                var score = user[$this.data("sort_key")];
+        $row.children("td.score").each(function () {
+            var $this = $(this);
 
-                if ($this.hasClass("global")) {
-                    var max_score = DataStore.global_max_score;
-                    $this.text(round_to_str(score, DataStore.global_score_precision));
-                } else if ($this.hasClass("contest")) {
-                    var contest = DataStore.contests[$this.data("contest")];
-                    var max_score = contest["max_score"];
-                    $this.text(round_to_str(score, contest["score_precision"]));
-                } else if ($this.hasClass("task")) {
-                    var task = DataStore.tasks[$this.data("task")];
-                    var max_score = task["max_score"];
-                    $this.text(round_to_str(score, task["score_precision"]));
-                }
+            var score = user[$this.data("sort_key")];
 
-                // TODO we could user a data-* attribute to store the score class
+            if ($this.hasClass("global")) {
+                var max_score = DataStore.global_max_score;
+                $this.text(round_to_str(score, DataStore.global_score_precision));
+            } else if ($this.hasClass("contest")) {
+                var contest = DataStore.contests[$this.data("contest")];
+                var max_score = contest["max_score"];
+                $this.text(round_to_str(score, contest["score_precision"]));
+            } else if ($this.hasClass("task")) {
+                var task = DataStore.tasks[$this.data("task")];
+                var max_score = task["max_score"];
+                $this.text(round_to_str(score, task["score_precision"]));
+            }
 
-                var score_class = self.get_score_class(score, max_score);
-                $this.removeClass("score_0 score_0_10 score_10_20 score_20_30 score_30_40 score_40_50 score_50_60 score_60_70 score_70_80 score_80_90 score_90_100 score_100");
-                $this.addClass(score_class);
-       	    });
-		}
+            // TODO we could user a data-* attribute to store the score class
+
+            var score_class = self.get_score_class(score, max_score);
+            $this.removeClass("score_0 score_0_10 score_10_20 score_20_30 score_30_40 score_40_50 score_50_60 score_60_70 score_70_80 score_80_90 score_90_100 score_100");
+            $this.addClass(score_class);
+        });
 
         self.move_user(user);
 
-		if(user["key"][0]==self.niv){
-            // Restart CSS animation
-            $row.removeClass("score_up score_down");
-            if (delta > 0) {
+        // Restart CSS animation
+        $row.removeClass("score_up score_down");
+        if (delta > 0) {
             $row.addClass("score_up");
-            } else if (delta < 0) {
-                $row.addClass("score_down");
-            }
+        } else if (delta < 0) {
+            $row.addClass("score_down");
         }
     };
 
 
     // This callback is called by the DataStore when a user changes rank.
     self.rank_handler = function (u_id, user) {
-		if(user["key"][0]==self.niv){
-            var $row = $(user["row"]);
+        var $row = $(user["row"]);
 
-            $row.children("td.rank").text(user["rank"]);
-        }
+        $row.children("td.rank").text(user["rank"]);
     };
 
 

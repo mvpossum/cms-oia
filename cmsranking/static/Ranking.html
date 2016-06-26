@@ -35,22 +35,6 @@ if (!("EventSource" in window)) {
                 <img src="logo" />
             </div>
             <div id="UpperPanel">
-                <div id="Nivel1" class="Nivel_box">
-                    <div class="Nivel_label">Nivel 1</div>
-                    <div class="Nivel_text"></div>
-                </div>
-                <div id="Nivel2" class="Nivel_box">
-                    <div class="Nivel_label">Nivel 2</div>
-                    <div class="Nivel_text"></div>
-                </div>
-                <div id="Nivel3" class="Nivel_box">
-                    <div class="Nivel_label">Nivel 3</div>
-                    <div class="Nivel_text"></div>
-                </div>
-                <div id="NivelX" class="Nivel_box">
-                    <div class="Nivel_label">Nivel X</div>
-                    <div class="Nivel_text"></div>
-                </div>
                 <div id="ConnectionStatus_box">
                     <div id="ConnectionStatus_label">Estado</div>
                     <div id="ConnectionStatus_text"></div>
@@ -72,10 +56,25 @@ if (!("EventSource" in window)) {
                 </div>
             </div>
             <div id="InnerFrame">
-                <table id="Scoreboard">
-                    <colgroup id="Scoreboard_cols"></colgroup>
-                    <thead id="Scoreboard_head"></thead>
-                    <tbody id="Scoreboard_body"></tbody>
+                <table class="scoreboard" id="Scoreboard1">
+                    <colgroup class="scoreboard_cols" id="Scoreboard_cols1"></colgroup>
+                    <thead class="scoreboard_head" id="Scoreboard_head1"></thead>
+                    <tbody class="scoreboard_body" id="Scoreboard_body1"></tbody>
+                </table>
+                <table class="scoreboard"  id="Scoreboard2">
+                    <colgroup class="scoreboard_cols" id="Scoreboard_cols2"></colgroup>
+                    <thead class="scoreboard_head" id="Scoreboard_head2"></thead>
+                    <tbody class="scoreboard_body" id="Scoreboard_body2"></tbody>
+                </table>
+                <table class="scoreboard"  id="Scoreboard3">
+                    <colgroup class="scoreboard_cols" id="Scoreboard_cols3"></colgroup>
+                    <thead class="scoreboard_head" id="Scoreboard_head3"></thead>
+                    <tbody class="scoreboard_body" id="Scoreboard_body3"></tbody>
+                </table>
+                <table class="scoreboard"  id="Scoreboard0">
+                    <colgroup class="scoreboard_cols" id="Scoreboard_cols0"></colgroup>
+                    <thead class="scoreboard_head" id="Scoreboard_head0"></thead>
+                    <tbody class="scoreboard_body" id="Scoreboard_body0"></tbody>
                 </table>
             </div>
         </div>

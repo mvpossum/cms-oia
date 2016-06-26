@@ -410,9 +410,14 @@ var DataStore = new function () {
     };
 
     self.create_user = function (key, data) {
-        if (key.length>=3 && self.teams[key[1]+key[2]] !== undefined)
+        if (data["team"] !== null && self.teams[data["team"]] === undefined)
         {
-			data["team"]=key[1]+key[2];
+            console.error("Could not find team " + data["team"] + " for user " + key);
+            if (self.es) {
+                self.es.close();
+            }
+            self.update_network_status(4);
+            return;
         }
 
         data["key"] = key;
