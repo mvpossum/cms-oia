@@ -358,15 +358,14 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             args["title"]=name
         else:
             load(conf, args, ["title", "nome"])
+        
+        load(conf, args, ["category"])
 
-==== BASE ====
         assert name == args["name"]
 
         if args["name"] == args["title"]:
             logger.warning("Short name equals long name (title). "
                            "Please check.")
-
-==== BASE ====
         if get_statement:
             primary_language = load(conf, None, "primary_language")
             if primary_language is None:

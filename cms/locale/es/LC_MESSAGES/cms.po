@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CMS 1.2.0pre\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-04 19:55-0300\n"
+"POT-Creation-Date: 2016-06-26 11:28-0300\n"
 "PO-Revision-Date: 2014-07-26 16:34-0300\n"
 "Last-Translator: Martin <mvillagra0@gmail.com>\n"
 "Language-Team: Spanish\n"
@@ -62,6 +62,14 @@ msgstr "La salida es correcta"
 
 msgid "Your submission ran and gave the correct answer"
 msgstr "Tu envío se ejecutó y devolvío la respuesta correcta"
+
+#, fuzzy
+msgid "Output is partially correct"
+msgstr "La salida es parcialmente correcta"
+
+#, fuzzy
+msgid "Your submission ran and gave the partially correct answer"
+msgstr "Tu envío se ejecutó y devolvío una respuesta parcialmente correcta"
 
 msgid "Output isn't correct"
 msgstr "La salida es incorrecta"
@@ -614,6 +622,9 @@ msgstr "Enviar solución"
 msgid "Documentation"
 msgstr "Documentación"
 
+msgid "Testing"
+msgstr "Pruebas"
+
 msgid "Printing"
 msgstr "Imprimir"
 
@@ -1069,9 +1080,6 @@ msgstr "Detalles del envío"
 
 msgid "Close"
 msgstr "Cerrar"
-
-msgid "Testing"
-msgstr "Pruebas"
 
 msgid "Submit a test"
 msgstr "Enviar una prueba"

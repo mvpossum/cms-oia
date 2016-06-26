@@ -168,19 +168,19 @@ class ContestImporter(BaseImporter):
 
                 if user is None:
                     if self.import_users:
-                        user = self.loader.get_task_loader(username).get_user(
+                        user = self.loader.get_task_loader(p["username"]).get_user(
                             )
                         if user:
                             session.add(user)
                         else:
                             logger.critical("Could not import user \"%s\".",
-                                            username)
+                                            p["username"])
                             return
                     else:
                         # FIXME: it would be nice to automatically try to
                         # import.
                         logger.critical("User \"%s\" not found in database.",
-                                        username)
+                                        p["username"])
                         return
 
                 if team is None and p.get("team") is not None:

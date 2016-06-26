@@ -511,12 +511,6 @@ msgstr ""
 #, python-format
 msgid ""
 "Logged in as <strong>%(first_name)s %(last_name)s</strong> "
-"<em>(%(username)s)</em>, level <strong>%(lvl)s</strong>"
-msgstr ""
-
-#, python-format
-msgid ""
-"Logged in as <strong>%(first_name)s %(last_name)s</strong> "
 "<em>(%(username)s)</em>"
 msgstr ""
 
@@ -582,6 +576,9 @@ msgid "Submissions"
 msgstr ""
 
 msgid "Documentation"
+msgstr ""
+
+msgid "Testing"
 msgstr ""
 
 msgid "Printing"
@@ -773,6 +770,12 @@ msgid "Time limit"
 msgstr ""
 
 msgid "Memory limit"
+msgstr ""
+
+msgid "Type"
+msgstr ""
+
+msgid "Files"
 msgstr ""
 
 msgid "Tokens"
@@ -992,9 +995,6 @@ msgstr ""
 msgid "Score"
 msgstr ""
 
-msgid "Files"
-msgstr ""
-
 msgid "Token"
 msgstr ""
 
@@ -1005,9 +1005,6 @@ msgid "Submission details"
 msgstr ""
 
 msgid "Close"
-msgstr ""
-
-msgid "Testing"
 msgstr ""
 
 msgid "Submit a test"
