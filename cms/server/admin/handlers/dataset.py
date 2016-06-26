@@ -8,6 +8,7 @@
 # Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,20 +33,22 @@ from __future__ import unicode_literals
 
 import json
 import logging
+import os
 import re
+import shutil
+import tempfile
 import zipfile
 
 from StringIO import StringIO
 import tornado.web
 
-from sqlalchemy.orm import joinedload
-
-from cms.db import Dataset, Manager, Message, Session, Submission, User, \
-    Task, Testcase
+from cms import config
+from cms.db import Dataset, Manager, Message, Participation, \
+    Session, Submission, Task, Testcase
 from cms.grading import compute_changes_for_dataset
 from cmscommon.datetime import make_datetime
 
-from .base import BaseHandler
+from .base import BaseHandler, FileHandler, require_permission
 
 
 logger = logging.getLogger(__name__)
@@ -56,11 +59,16 @@ class DatasetSubmissionsHandler(BaseHandler):
     view the results under different datasets.
 
     """
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
 
-        self.r_params = self.render_params()
+        submission_query = self.sql_session.query(Submission)\
+            .filter(Submission.task == task)
+        page = int(self.get_query_argument("page", 0))
+        self.render_params_for_submissions(submission_query, page)
+
         self.r_params["task"] = task
         self.r_params["active_dataset"] = task.active_dataset
         self.r_params["shown_dataset"] = dataset
@@ -68,15 +76,6 @@ class DatasetSubmissionsHandler(BaseHandler):
             self.sql_session.query(Dataset)\
                             .filter(Dataset.task == task)\
                             .order_by(Dataset.description).all()
-        self.r_params["submissions"] = \
-            self.sql_session.query(Submission)\
-                            .filter(Submission.task == task)\
-                            .options(joinedload(Submission.task))\
-                            .options(joinedload(Submission.participation))\
-                            .options(joinedload(Submission.files))\
-                            .options(joinedload(Submission.token))\
-                            .options(joinedload(Submission.results))\
-                            .order_by(Submission.timestamp.desc()).all()
         self.render("dataset.html", **self.r_params)
 
 
@@ -88,7 +87,9 @@ class CloneDatasetHandler(BaseHandler):
 
     If referred by GET, this handler will return a HTML form.
     If referred by POST, this handler will create the dataset.
+
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id_to_copy):
         dataset = self.safe_get_item(Dataset, dataset_id_to_copy)
         task = self.safe_get_item(Task, dataset.task_id)
@@ -109,6 +110,7 @@ class CloneDatasetHandler(BaseHandler):
         self.r_params["default_description"] = description
         self.render("add_dataset.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id_to_copy):
         fallback_page = "/dataset/%s/clone" % dataset_id_to_copy
 
@@ -177,6 +179,7 @@ class RenameDatasetHandler(BaseHandler):
     """Rename the descripton of a dataset.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -186,6 +189,7 @@ class RenameDatasetHandler(BaseHandler):
         self.r_params["dataset"] = dataset
         self.render("rename_dataset.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id):
         fallback_page = "/dataset/%s/rename" % dataset_id
 
@@ -216,6 +220,7 @@ class DeleteDatasetHandler(BaseHandler):
     """Delete a dataset from a task.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -225,6 +230,7 @@ class DeleteDatasetHandler(BaseHandler):
         self.r_params["dataset"] = dataset
         self.render("delete_dataset.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -241,12 +247,13 @@ class ActivateDatasetHandler(BaseHandler):
     """Set a given dataset to be the active one for a task.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
 
         changes = compute_changes_for_dataset(task.active_dataset, dataset)
-        notify_users = set()
+        notify_participations = set()
 
         # By default, we will notify users who's public scores have changed, or
         # their non-public scores have changed but they have used a token.
@@ -256,15 +263,16 @@ class ActivateDatasetHandler(BaseHandler):
                 c.new_public_score is not None
             if public_score_changed or \
                     (c.submission.tokened() and score_changed):
-                notify_users.add(c.submission.participation.user.id)
+                notify_participations.add(c.submission.participation.id)
 
         self.r_params = self.render_params()
         self.r_params["task"] = task
         self.r_params["dataset"] = dataset
         self.r_params["changes"] = changes
-        self.r_params["default_notify_users"] = notify_users
+        self.r_params["default_notify_participations"] = notify_participations
         self.render("activate_dataset.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -291,11 +299,11 @@ class ActivateDatasetHandler(BaseHandler):
             m = r.match(k)
             if not m:
                 continue
-            user = self.safe_get_item(User, m.group(1))
+            participation = self.safe_get_item(Participation, m.group(1))
             message = Message(datetime,
                               self.get_argument("message_subject", ""),
                               self.get_argument("message_text", ""),
-                              user=user)
+                              participation=participation)
             self.sql_session.add(message)
             count += 1
 
@@ -311,6 +319,7 @@ class ToggleAutojudgeDatasetHandler(BaseHandler):
     """Toggle whether a given dataset is judged automatically or not.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
 
@@ -333,6 +342,7 @@ class AddManagerHandler(BaseHandler):
     """Add a manager to a dataset.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -342,6 +352,7 @@ class AddManagerHandler(BaseHandler):
         self.r_params["dataset"] = dataset
         self.render("add_manager.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id):
         fallback_page = "/dataset/%s/managers/add" % dataset_id
 
@@ -381,6 +392,7 @@ class DeleteManagerHandler(BaseHandler):
     """Delete a manager.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id, manager_id):
         manager = self.safe_get_item(Manager, manager_id)
         dataset = self.safe_get_item(Dataset, dataset_id)
@@ -401,6 +413,7 @@ class AddTestcaseHandler(BaseHandler):
     """Add a testcase to a dataset.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -410,6 +423,7 @@ class AddTestcaseHandler(BaseHandler):
         self.r_params["dataset"] = dataset
         self.render("add_testcase.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id):
         fallback_page = "/dataset/%s/testcases/add" % dataset_id
 
@@ -470,6 +484,7 @@ class AddTestcasesHandler(BaseHandler):
     """Add several testcases to a dataset.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id):
         dataset = self.safe_get_item(Dataset, dataset_id)
         task = dataset.task
@@ -479,6 +494,7 @@ class AddTestcasesHandler(BaseHandler):
         self.r_params["dataset"] = dataset
         self.render("add_testcases.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, dataset_id):
         fallback_page = "/dataset/%s/testcases/add_multiple" % dataset_id
 
@@ -500,12 +516,8 @@ class AddTestcasesHandler(BaseHandler):
         overwrite = self.get_argument("overwrite", None) is not None
 
         # Get input/output file names templates, or use default ones.
-        input_template = self.get_argument("input_template", None)
-        if not input_template:
-            input_template = "input.*"
-        output_template = self.get_argument("output_template", None)
-        if not output_template:
-            output_template = "output.*"
+        input_template = self.get_argument("input_template", "input.*")
+        output_template = self.get_argument("output_template", "output.*")
         input_re = re.compile(re.escape(input_template).replace("\\*",
                               "(.*)") + "$")
         output_re = re.compile(re.escape(output_template).replace("\\*",
@@ -625,6 +637,7 @@ class DeleteTestcaseHandler(BaseHandler):
     """Delete a testcase.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, dataset_id, testcase_id):
         testcase = self.safe_get_item(Testcase, testcase_id)
         dataset = self.safe_get_item(Dataset, dataset_id)
@@ -641,3 +654,63 @@ class DeleteTestcaseHandler(BaseHandler):
             # max_score and/or extra_headers might have changed.
             self.application.service.proxy_service.reinitialize()
         self.redirect("/task/%s" % task.id)
+
+
+class DownloadTestcasesHandler(FileHandler):
+    """Download all testcases in a zip file.
+
+    """
+    @require_permission(BaseHandler.AUTHENTICATED)
+    def get(self, dataset_id):
+        dataset = self.safe_get_item(Dataset, dataset_id)
+        task = dataset.task
+
+        self.r_params = self.render_params()
+        self.r_params["task"] = task
+        self.r_params["dataset"] = dataset
+        self.render("download_testcases.html", **self.r_params)
+
+    @require_permission(BaseHandler.AUTHENTICATED)
+    def post(self, dataset_id):
+        fallback_page = "/dataset/%s/testcases/download" % dataset_id
+
+        dataset = self.safe_get_item(Dataset, dataset_id)
+
+        # Get zip file name, input/output file names templates,
+        # or use default ones.
+        zip_filename = self.get_argument("zip_filename", "testcases.zip")
+        input_template = self.get_argument("input_template", "input.*")
+        output_template = self.get_argument("output_template", "output.*")
+
+        # Template validations
+        if input_template.count('*') != 1 or output_template.count('*') != 1:
+            self.application.service.add_notification(
+                make_datetime(),
+                "Invalid template format",
+                "You must have exactly one '*' in input/output template.")
+            self.redirect(fallback_page)
+            return
+
+        # Replace input/output template placeholder with the python format.
+        input_template = input_template.strip().replace("*", "%s")
+        output_template = output_template.strip().replace("*", "%s")
+
+        # Create a temp dir to contain the content of the zip file.
+        tempdir = tempfile.mkdtemp(dir=config.temp_dir)
+        zip_path = os.path.join(tempdir, "testcases.zip")
+        with zipfile.ZipFile(zip_path, "w") as zip_file:
+            for testcase in dataset.testcases.itervalues():
+                # Get input, output file path
+                input_path = self.application.service.file_cacher.\
+                    get_file(testcase.input).name
+                output_path = self.application.service.file_cacher.\
+                    get_file(testcase.output).name
+                zip_file.write(
+                    input_path, input_template % testcase.codename)
+                zip_file.write(
+                    output_path, output_template % testcase.codename)
+            zip_file.close()
+
+        self.fetch_from_filesystem(zip_path, "application/zip", zip_filename)
+
+        shutil.rmtree(tempdir)

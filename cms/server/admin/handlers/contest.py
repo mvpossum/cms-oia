@@ -3,11 +3,12 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2015 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -34,13 +35,16 @@ from cms import ServiceCoord, get_service_shards, get_service_address
 from cms.db import Contest
 from cmscommon.datetime import make_datetime
 
-from .base import BaseHandler, SimpleContestHandler, SimpleHandler
+from .base import BaseHandler, SimpleContestHandler, SimpleHandler, \
+    require_permission
 
 
-class AddContestHandler(SimpleHandler("add_contest.html")):
+class AddContestHandler(
+        SimpleHandler("add_contest.html", permission_all=True)):
     """Adds a new contest.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self):
         fallback_page = "/contests/add"
 
@@ -48,45 +52,8 @@ class AddContestHandler(SimpleHandler("add_contest.html")):
             attrs = dict()
 
             self.get_string(attrs, "name", empty=None)
-            self.get_string(attrs, "description")
-
             assert attrs.get("name") is not None, "No contest name specified."
-
-            allowed_localizations = \
-                self.get_argument("allowed_localizations", "")
-            if allowed_localizations:
-                attrs["allowed_localizations"] = \
-                    [x.strip() for x in allowed_localizations.split(",")
-                     if len(x) > 0 and not x.isspace()]
-            else:
-                attrs["allowed_localizations"] = []
-
-            attrs["languages"] = self.get_arguments("languages")
-
-            self.get_bool(attrs, "submissions_download_allowed")
-
-            self.get_string(attrs, "token_mode")
-            self.get_int(attrs, "token_max_number")
-            self.get_timedelta_sec(attrs, "token_min_interval")
-            self.get_int(attrs, "token_gen_initial")
-            self.get_int(attrs, "token_gen_number")
-            self.get_timedelta_min(attrs, "token_gen_interval")
-            self.get_int(attrs, "token_gen_max")
-
-            self.get_int(attrs, "max_submission_number")
-            self.get_int(attrs, "max_user_test_number")
-            self.get_timedelta_sec(attrs, "min_submission_interval")
-            self.get_timedelta_sec(attrs, "min_user_test_interval")
-
-            self.get_datetime(attrs, "start")
-            self.get_datetime(attrs, "stop")
-
-            self.get_string(attrs, "timezone", empty=None)
-            self.get_timedelta_sec(attrs, "per_user_time")
-            self.get_int(attrs, "score_precision")
-            self.get_bool(attrs, "restrict_level")
-            self.get_bool(attrs, "categories_enabled")
-            self.get_bool(attrs, "show_time")
+            attrs["description"] = attrs["name"]
 
             # Create the contest.
             contest = Contest(**attrs)
@@ -107,6 +74,7 @@ class AddContestHandler(SimpleHandler("add_contest.html")):
 
 
 class ContestHandler(SimpleContestHandler("contest.html")):
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, contest_id):
         contest = self.safe_get_item(Contest, contest_id)
 
@@ -130,6 +98,11 @@ class ContestHandler(SimpleContestHandler("contest.html")):
             attrs["languages"] = self.get_arguments("languages")
 
             self.get_bool(attrs, "submissions_download_allowed")
+            self.get_bool(attrs, "allow_questions")
+            self.get_bool(attrs, "allow_user_tests")
+            self.get_bool(attrs, "block_hidden_participations")
+            self.get_bool(attrs, "ip_restriction")
+            self.get_bool(attrs, "ip_autologin")
 
             self.get_string(attrs, "token_mode")
             self.get_int(attrs, "token_max_number")
@@ -173,7 +146,7 @@ class OverviewHandler(BaseHandler):
     """Home page handler, with queue and workers statuses.
 
     """
-
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, contest_id=None):
         if contest_id is not None:
             self.contest = self.safe_get_item(Contest, contest_id)
@@ -183,6 +156,7 @@ class OverviewHandler(BaseHandler):
 
 
 class ResourcesListHandler(BaseHandler):
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, contest_id=None):
         if contest_id is not None:
             self.contest = self.safe_get_item(Contest, contest_id)

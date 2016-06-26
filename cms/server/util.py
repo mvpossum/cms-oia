@@ -3,9 +3,10 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2012 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
-# Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2012-2016 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,7 +39,9 @@ from tornado.web import RequestHandler
 import tornado.locale
 
 import gevent
+import io
 
+from cms.db import Session
 from cms.db.filecacher import FileCacher
 from cmscommon.datetime import make_datetime, utc
 
@@ -188,7 +191,9 @@ def actual_phase_required(*actual_phases):
     def decorator(func):
         @wraps(func)
         def wrapped(self, *args, **kwargs):
-            if self.r_params["actual_phase"] not in actual_phases:
+            if self.r_params["actual_phase"] not in actual_phases and \
+                    (self.current_user is None or
+                     not self.current_user.unrestricted):
                 # TODO maybe return some error code?
                 self.redirect("/")
             else:
@@ -213,15 +218,18 @@ def format_size(n):
         return '0 B'
 
     # Use the last unit that's smaller than n
-    unit = map(lambda x: n >= x, DIMS).index(False) - 1
-    n = float(n) / DIMS[unit]
+    try:
+        unit_index = next(i for i, x in enumerate(DIMS) if n < x) - 1
+    except StopIteration:
+        unit_index = -1
+    n = float(n) / DIMS[unit_index]
 
     if n < 10:
-        return "%g %s" % (round(n, 2), UNITS[unit])
+        return "%g %s" % (round(n, 2), UNITS[unit_index])
     elif n < 100:
-        return "%g %s" % (round(n, 1), UNITS[unit])
+        return "%g %s" % (round(n, 1), UNITS[unit_index])
     else:
-        return "%g %s" % (round(n, 0), UNITS[unit])
+        return "%g %s" % (round(n, 0), UNITS[unit_index])
 
 
 def format_date(dt, timezone, locale=None):
@@ -570,9 +578,7 @@ def file_handler_gen(BaseClass):
 
         """
         def fetch(self, digest, content_type, filename):
-            """Sends the RPC to the FS.
-
-            """
+            """Send a file from FileCacher by its digest."""
             if digest == "":
                 logger.error("No digest given")
                 self.finish()
@@ -580,12 +586,29 @@ def file_handler_gen(BaseClass):
             try:
                 self.temp_file = \
                     self.application.service.file_cacher.get_file(digest)
-            except Exception as error:
-                logger.error("Exception while retrieving file `%s'. %r",
-                             filename, error)
+            except Exception:
+                logger.error("Exception while retrieving file `%s'.", digest,
+                             exc_info=True)
                 self.finish()
                 return
+            self._fetch_temp_file(content_type, filename)
 
+        def fetch_from_filesystem(self, filepath, content_type, filename):
+            """Send a file from filesystem by filepath."""
+            try:
+                self.temp_file = io.open(filepath, 'rb')
+            except Exception:
+                logger.error("Exception while retrieving file `%s'.", filepath,
+                             exc_info=True)
+                self.finish()
+                return
+            self._fetch_temp_file(content_type, filename)
+
+        def _fetch_temp_file(self, content_type, filename):
+            """When calling this method, self.temp_file must be a fileobj
+            seeked at the beginning of the file.
+
+            """
             self.set_header("Content-Type", content_type)
             self.set_header("Content-Disposition",
                             "attachment; filename=\"%s\"" % filename)
@@ -644,11 +667,31 @@ class CommonRequestHandler(RequestHandler):
 
     """
 
+    # Whether the login cookie duration has to be refreshed when
+    # this handler is called. Useful to filter asynchronous
+    # requests.
+    refresh_cookie = True
+
     def __init__(self, *args, **kwargs):
         super(CommonRequestHandler, self).__init__(*args, **kwargs)
+        self.timestamp = None
         self.sql_session = None
         self.r_params = None
         self.contest = None
+
+    def prepare(self):
+        """This method is executed at the beginning of each request.
+
+        """
+        super(CommonRequestHandler, self).prepare()
+        self.timestamp = make_datetime()
+        self.set_header("Cache-Control", "no-cache, must-revalidate")
+        self.sql_session = Session()
+        self.sql_session.expire_all()
+
+    @property
+    def service(self):
+        return self.application.service
 
     def redirect(self, url):
         url = get_url_root(self.request.path) + url

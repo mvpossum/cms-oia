@@ -85,6 +85,11 @@ input, textarea {
     border-radius: 4px;
 }
 
+table input[type=text], table textarea {
+    min-width: 25em;
+    width: 100%;
+}
+
 input:focus, textarea:focus {
     border: 1px solid #FFD69C;
 }
@@ -183,6 +188,15 @@ ul.normal_list {
     text-align: center;
     margin: 20px auto 20px;
     color: red;
+}
+
+.login_notice {
+    font-size: 0.8em;
+    line-height: 1.125em;
+    text-align: left;
+    width: 200px;
+    margin-left: 15px;
+    margin-top: 15px;
 }
 
 .cr_notice {
@@ -611,8 +625,71 @@ body.admin .notifications .notification_close:hover {
 
 
 
+/* LOGIN PAGE */
+#login-content {
+    padding: 20px;
+    width: 400px;
+}
+
+#login-content h1 {
+    font-size: 24px;
+}
+
+#login-content h4 {
+    font-size: 18px;
+    font-weight: bold;
+    padding: 15px 0;
+}
+
+#login-content .alert {
+    color: red;
+}
+
+#login-content .section {
+    padding: 10px;
+}
+
+#login-content .section:last-child {
+    float: right;
+    clear: both;
+}
+
+#login-content form label {
+    display: flex;
+}
+
+#login-content form label span {
+    flex-grow: 1;
+    display: flex;
+}
+
+#login-content form label input {
+    width: 200px;
+}
+
+
 
 /* HACKS */
 table.jqplot-table-legend {
     width: auto;
+}
+
+
+
+/* OTHERS */
+span.info {
+    color: #6DC942;
+    font-size: smaller;
+    background-color: #EEF3EA;
+    display: inline-block;
+    border-radius: 10px;
+    width: 16px;
+    height: 16px;
+    text-align: center;
+    font-weight: bold;
+    margin: 0 8px;
+    line-height: 18px;
+}
+span.info::after {
+    content: "?";
 }

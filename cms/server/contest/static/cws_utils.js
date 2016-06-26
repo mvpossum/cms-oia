@@ -37,6 +37,11 @@ CMS.CWSUtils = function(url_root, timestamp, timezoned_timestamp,
     this.phase = phase;
     this.remaining_div = null;
     this.unread_count = 0;
+
+    // Ask permission for desktop notifications
+    if ("Notification" in window) {
+        Notification.requestPermission();
+    }
 };
 
 
@@ -63,8 +68,9 @@ CMS.CWSUtils.prototype.update_notifications = function() {
 };
 
 
-CMS.CWSUtils.prototype.display_notification = function(
-    type, timestamp, subject, text, level) {
+CMS.CWSUtils.prototype.display_notification = function(type, timestamp,
+                                                       subject, text,
+                                                       level) {
     if (this.last_notification < timestamp) {
         this.last_notification = timestamp;
     }
@@ -95,6 +101,34 @@ CMS.CWSUtils.prototype.display_notification = function(
     }
 
     $("#notifications").prepend(alert);
+
+    // Trigger a desktop notification as well (but only if it's needed)
+    if (type !== "notification") {
+        this.desktop_notification(type, timestamp, subject, text, level);
+    }
+};
+
+
+CMS.CWSUtils.prototype.desktop_notification = function(type, timestamp,
+                                                       subject, text,
+                                                       level) {
+    // Check desktop notifications support
+    if (!("Notification" in window)) {
+        return;
+    }
+
+    // Ask again, if it was not explicitly denied
+    if (Notification.permission !== "granted" && Notification.permission !== "denied") {
+        Notification.requestPermission();
+    }
+
+    // Create notification
+    if (Notification.permission === "granted") {
+        var notification = new Notification(subject, {
+            "body": text,
+            "icon": "/favicon.ico"
+        });
+    }
 };
 
 
@@ -157,7 +191,7 @@ CMS.CWSUtils.prototype.format_timedelta = function(timedelta) {
 };
 
 
-CMS.CWSUtils.prototype.update_time = function() {
+CMS.CWSUtils.prototype.update_time = function(usaco_like_contest) {
     var now = $.now() / 1000;
 
     // FIXME This may cause some problems around DST boundaries, as it
@@ -183,10 +217,16 @@ CMS.CWSUtils.prototype.update_time = function() {
             this.format_timedelta(this.current_phase_end - server_time));
         break;
     case -1:
-        // Contest has already started but user hasn't started its
-        // time yet.
-        $("#countdown_label").text(
-            $("#translation_until_contest_ends").text());
+        // Contest has already started but user is not competing yet,
+        // either because they haven't started the per user time yet,
+        // or because their start was delayed.
+        if (usaco_like_contest) {
+            $("#countdown_label").text(
+                $("#translation_until_contest_ends").text());
+        } else {
+            $("#countdown_label").text(
+                $("#translation_until_contest_starts").text());
+        }
         $("#countdown").text(
             this.format_timedelta(this.current_phase_end - server_time));
         break;

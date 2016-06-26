@@ -3,11 +3,12 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -35,16 +36,18 @@ import traceback
 
 import tornado.web
 
-from cms.db import Attachment, Dataset, Session, Statement, Submission, Task
+from cms.db import Attachment, Dataset, Session, Statement, Submission, \
+    SubmissionFormatElement, Task
 from cmscommon.datetime import make_datetime
 
-from .base import BaseHandler, SimpleHandler
+from .base import BaseHandler, SimpleHandler, require_permission
 
 
 logger = logging.getLogger(__name__)
 
 
-class AddTaskHandler(SimpleHandler("add_task.html")):
+class AddTaskHandler(SimpleHandler("add_task.html", permission_all=True)):
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self):
         fallback_page = "/tasks/add"
 
@@ -52,31 +55,14 @@ class AddTaskHandler(SimpleHandler("add_task.html")):
             attrs = dict()
 
             self.get_string(attrs, "name", empty=None)
-            self.get_string(attrs, "title")
             self.get_string(attrs, "category")
 
             assert attrs.get("name") is not None, "No task name specified."
+            attrs["title"] = attrs["name"]
 
-            self.get_string(attrs, "primary_statements")
-
-            self.get_submission_format(attrs)
-
-            self.get_string(attrs, "token_mode")
-            self.get_int(attrs, "token_max_number")
-            self.get_timedelta_sec(attrs, "token_min_interval")
-            self.get_int(attrs, "token_gen_initial")
-            self.get_int(attrs, "token_gen_number")
-            self.get_timedelta_min(attrs, "token_gen_interval")
-            self.get_int(attrs, "token_gen_max")
-
-            self.get_int(attrs, "max_submission_number")
-            self.get_int(attrs, "max_user_test_number")
-            self.get_timedelta_sec(attrs, "min_submission_interval")
-            self.get_timedelta_sec(attrs, "min_user_test_interval")
-
-            self.get_int(attrs, "score_precision")
-
-            self.get_string(attrs, "score_mode")
+            # Set default submission format as ["taskname.%l"]
+            attrs["submission_format"] = \
+                [SubmissionFormatElement("%s.%%l" % attrs["name"])]
 
             # Create the task.
             task = Task(**attrs)
@@ -91,14 +77,13 @@ class AddTaskHandler(SimpleHandler("add_task.html")):
         try:
             attrs = dict()
 
-            self.get_time_limit(attrs, "time_limit")
-            self.get_memory_limit(attrs, "memory_limit")
-            self.get_task_type(attrs, "task_type", "TaskTypeOptions_")
-            self.get_score_type(attrs, "score_type", "score_type_parameters")
-
             # Create its first dataset.
             attrs["description"] = "Default"
             attrs["autojudge"] = True
+            attrs["task_type"] = "Batch"
+            attrs["task_type_parameters"] = '["alone", ["", ""], "diff"]'
+            attrs["score_type"] = "Sum"
+            attrs["score_type_parameters"] = '100'
             attrs["task"] = task
             dataset = Dataset(**attrs)
             self.sql_session.add(dataset)
@@ -124,8 +109,10 @@ class TaskHandler(BaseHandler):
     """Task handler, with a POST method to edit the task.
 
     """
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, task_id):
         task = self.safe_get_item(Task, task_id)
+        self.contest = task.contest
 
         self.r_params = self.render_params()
         self.r_params["task"] = task
@@ -135,6 +122,7 @@ class TaskHandler(BaseHandler):
                 .order_by(Submission.timestamp.desc()).all()
         self.render("task.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, task_id):
         task = self.safe_get_item(Task, task_id)
 
@@ -212,6 +200,7 @@ class AddStatementHandler(BaseHandler):
     """Add a statement to a task.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, task_id):
         task = self.safe_get_item(Task, task_id)
 
@@ -219,6 +208,7 @@ class AddStatementHandler(BaseHandler):
         self.r_params["task"] = task
         self.render("add_statement.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, task_id):
         fallback_page = "/task/%s/statements/add" % task_id
 
@@ -277,6 +267,7 @@ class StatementHandler(BaseHandler):
     """
     # No page for single statements.
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def delete(self, task_id, statement_id):
         statement = self.safe_get_item(Statement, statement_id)
         task = self.safe_get_item(Task, task_id)
@@ -289,13 +280,14 @@ class StatementHandler(BaseHandler):
         self.try_commit()
 
         # Page to redirect to.
-        self.write("/task/%s" % task.id)
+        self.write("%s" % task.id)
 
 
 class AddAttachmentHandler(BaseHandler):
     """Add an attachment to a task.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, task_id):
         task = self.safe_get_item(Task, task_id)
 
@@ -303,6 +295,7 @@ class AddAttachmentHandler(BaseHandler):
         self.r_params["task"] = task
         self.render("add_attachment.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, task_id):
         fallback_page = "/task/%s/attachments/add" % task_id
 
@@ -345,6 +338,7 @@ class AttachmentHandler(BaseHandler):
     """
     # No page for single attachments.
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def delete(self, task_id, attachment_id):
         attachment = self.safe_get_item(Attachment, attachment_id)
         task = self.safe_get_item(Task, task_id)
@@ -357,7 +351,7 @@ class AttachmentHandler(BaseHandler):
         self.try_commit()
 
         # Page to redirect to.
-        self.write("/task/%s" % task.id)
+        self.write("%s" % task.id)
 
 
 class AddDatasetHandler(BaseHandler):
@@ -368,7 +362,9 @@ class AddDatasetHandler(BaseHandler):
 
     If referred by GET, this handler will return a HTML form.
     If referred by POST, this handler will create the dataset.
+
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def get(self, task_id):
         task = self.safe_get_item(Task, task_id)
 
@@ -383,6 +379,7 @@ class AddDatasetHandler(BaseHandler):
         self.r_params["default_description"] = description
         self.render("add_dataset.html", **self.r_params)
 
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, task_id):
         fallback_page = "/task/%s/add_dataset" % task_id
 

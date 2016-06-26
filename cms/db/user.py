@@ -6,6 +6,8 @@
 # Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2015 William Di Luigi <williamdiluigi@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -29,7 +31,6 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from datetime import timedelta
-from string import ascii_lowercase
 
 from sqlalchemy.schema import Column, ForeignKey, CheckConstraint, \
     UniqueConstraint
@@ -37,21 +38,13 @@ from sqlalchemy.types import Boolean, Integer, String, Unicode, DateTime, \
     Interval
 from sqlalchemy.orm import relationship, backref
 
+from cmscommon.crypto import generate_random_password
+
 from . import Base, Contest
 
 
-def generate_random_password():
-    """Utility method to generate a random password.
-
-    return (string): a random string.
-
-    """
-    import random
-    return "".join((random.choice(ascii_lowercase) for _ in range(6)))
-
-
 class User(Base):
-    """Class to store a 'user participating in a contest'.
+    """Class to store a user.
 
     """
 
@@ -111,8 +104,39 @@ class User(Base):
     # participations (list of Participation objects)
 
 
+class Team(Base):
+    """Class to store a team.
+
+    A team is a way of grouping the users participating in a contest.
+    This grouping has no effect on the contest itself; it is only used
+    for display purposes in RWS.
+
+    """
+
+    __tablename__ = 'teams'
+
+    # Auto increment primary key.
+    id = Column(
+        Integer,
+        primary_key=True)
+
+    # Team code (e.g. the ISO 3166-1 code of a country)
+    code = Column(
+        Unicode,
+        nullable=False,
+        unique=True)
+
+    # Human readable team name (e.g. the ISO 3166-1 short name of a country)
+    name = Column(
+        Unicode,
+        nullable=False)
+
+    # TODO: decide if the flag images will eventually be stored here.
+    # TODO: (hopefully, the same will apply for faces in User).
+
+
 class Participation(Base):
-    """Class to store user participations to contests.
+    """Class to store a single participation of a user in a contest.
 
     """
     __tablename__ = 'participations'
@@ -163,6 +187,15 @@ class Participation(Base):
         nullable=False,
         default=False)
 
+    # An unrestricted participation (e.g. contest time,
+    # maximum number of submissions, minimum interval between submissions,
+    # maximum number of user tests, minimum interval between user tests),
+    # can also be used for debugging purposes.
+    unrestricted = Column(
+        Boolean,
+        nullable=False,
+        default=False)
+
     # Contest (id and object) to which the user is participating.
     contest_id = Column(
         Integer,
@@ -189,6 +222,19 @@ class Participation(Base):
                         cascade="all, delete-orphan",
                         passive_deletes=True))
     __table_args__ = (UniqueConstraint('contest_id', 'user_id'),)
+
+    # Team (id and object) that the user is representing with this
+    # participation.
+    team_id = Column(
+        Integer,
+        ForeignKey(Team.id,
+                   onupdate="CASCADE", ondelete="RESTRICT"),
+        nullable=True)
+    team = relationship(
+        Team,
+        backref=backref("participations",
+                        cascade="all, delete-orphan",
+                        passive_deletes=True))
 
     # Follows the description of the fields automatically added by
     # SQLAlchemy.

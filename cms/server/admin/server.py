@@ -5,7 +5,7 @@
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
 # Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
-# Copyright © 2012-2015 Luca Wehrstedt <luca.wehrstedt@gmail.com>
+# Copyright © 2012-2016 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
 #
@@ -31,14 +31,22 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import base64
+import json
 import logging
 import pkg_resources
 
+from werkzeug.contrib.securecookie import SecureCookie
+from werkzeug.wrappers import Request, Response
+
 from cms import config, ServiceCoord, get_service_shards
-from cms.io import WebService
 from cms.db.filecacher import FileCacher
+from cms.io import WebService
+from cmscommon.datetime import make_timestamp
 
 from .handlers import HANDLERS
+from .handlers import views
+from .authentication import AWSAuthMiddleware
+from .rpc_authorization import rpc_authorization_checker
 
 
 logger = logging.getLogger(__name__)
@@ -50,14 +58,17 @@ class AdminWebServer(WebService):
     """
     def __init__(self, shard):
         parameters = {
-            "login_url": "/",
+            "ui_modules": views,
+            "login_url": "/login",
             "template_path": pkg_resources.resource_filename(
                 "cms.server.admin", "templates"),
             "static_files": [("cms.server", "static"),
                              ("cms.server.admin", "static")],
             "cookie_secret": base64.b64encode(config.secret_key),
             "debug": config.tornado_debug,
+            "auth_middleware": AWSAuthMiddleware,
             "rpc_enabled": True,
+            "rpc_auth": self.is_rpc_authorized,
         }
         super(AdminWebServer, self).__init__(
             config.admin_listen_port,
@@ -85,6 +96,10 @@ class AdminWebServer(WebService):
             self.resource_services.append(self.connect_to(
                 ServiceCoord("ResourceService", i)))
         self.logservice = self.connect_to(ServiceCoord("LogService", 0))
+
+    def is_rpc_authorized(self, service, shard, method):
+        return rpc_authorization_checker(self.auth_handler.admin_id,
+                                         service, shard, method)
 
     def add_notification(self, timestamp, subject, text):
         """Store a new notification to send at the first

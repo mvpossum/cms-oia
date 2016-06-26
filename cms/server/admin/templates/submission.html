@@ -5,6 +5,10 @@
 {% from cms.grading.scoretypes import get_score_type %}
 {% set st = get_score_type(dataset=shown_dataset) %}
 {% set sr = s.get_result(shown_dataset) %}
+{% set status = SubmissionResult.COMPILING %}
+{% if sr is not None %}
+  {% set status = sr.get_status() %}
+{% end %}
 <div class="core_title">
   <h1>Submission {{ s.id }} (Task: <a href="{{ url_root }}/task/{{ s.task.id }}">{{ s.task.name }}</a>)</h1>
 </div>
@@ -62,27 +66,29 @@
       <tr>
         <td>Status</td>
         <td id="submission_status">
-          {% if sr is None or sr.compilation_outcome is None %}
+          {% if status == SubmissionResult.COMPILING %}
           Compiling...
-          {% elif sr.compilation_outcome == "fail" %}
+          {% elif status == SubmissionResult.COMPILATION_FAILED %}
           Compilation failed
-          {% elif not sr.evaluated() %}
+          {% elif status == SubmissionResult.EVALUATING %}
           Evaluating...
-          {% elif sr.scored() %}
+          {% elif status == SubmissionResult.SCORING %}
+          Scoring...
+          {% elif status == SubmissionResult.SCORED %}
             {% try %}
               {% set max_score = st.max_score %}
             {% except %}
               {% set max_score = "[Cannot get score type - see logs]" %}
             {% end %}
-          Evaluated ({{ sr.score }} / {{ max_score }})
+          Scored ({{ sr.score }} / {{ max_score }})
           {% else %}
-          Evaluated
+          N/A
           {% end %}
         </td>
       </tr>
       {% if sr is not None %}
       <tr>
-        <td>Compilation attempts</td>
+        <td>Failures during compilation</td>
         <td>{{ sr.compilation_tries }}</td>
       </tr>
       <tr>
@@ -94,17 +100,17 @@
         <td>{{ sr.compilation_sandbox }}</td>
       </tr>
       <tr>
-        <td>Evaluation attempts</td>
+        <td>Failures during evaluation</td>
         <td>{{ sr.evaluation_tries }}</td>
       </tr>
       {% end %}
       <tr>
         <td>Reevaluate</td>
         <td>
-          {% set reevaluation_par_name = "submission" %}
-          {% set reevaluation_par_value = s.id %}
-          {% set reevaluation_par_dataset_id = shown_dataset.id %}
-          {% include fragments/reevaluation_buttons.html %}
+          {% module ReevaluationButtons(
+                 url_root,
+                 submission_id=s.id,
+                 dataset_id=shown_dataset.id) %}
         </td>
       </tr>
     </tbody>
@@ -117,7 +123,11 @@
 <div id="comment">
   <form enctype="multipart/form-data" action="{{ url_root }}/submission/{{ s.id }}/{{ shown_dataset.id }}/comment" method="POST">
     <textarea name="comment" cols="40" rows="3">{{ s.comment }}</textarea></br>
-    <input type="submit"/>
+    <input
+{% if not current_user.permission_all %}
+       disabled
+{% end %}
+       type="submit"/>
     <input type="reset" value="Reset" />
   </form>
 </div>
@@ -146,9 +156,10 @@
   <table class="bordered">
     <thead>
       <tr>
+        <th>#</th>
         <th>Codename</th>
         <th>Outcome</th>
-        <th></th>
+        <th>Visible</th>
         <th>Details</th>
         <th>Shard</th>
         <th>Resources</th>
@@ -156,16 +167,15 @@
       </tr>
     </thead>
     <tbody>
-      {% for idx, ev in sorted((ev.codename, ev) for ev in sr.evaluations) %}
+      {% for idx, ev in enumerate(zip(*sorted((ev.codename, ev) for ev in sr.evaluations))[1], start=1) %}
       <tr>
-        <td id="eval_codename_{{ idx }}">{{ ev.codename }}</td>
-        <td id="eval_outcome_{{ idx }}">{{ ev.outcome }}</td>
-        {% if s.token is not None or ev.testcase.public %}
-        <td style="align: center;">&bullet;</td>
-        {% else %}
-        <td></td>
-        {% end %}
-        <td id="eval_text_{{ idx }}">{{ format_status_text(ev.text) }}</td>
+        <td>{{ idx }}</td>
+        <td>{{ ev.codename }}</td>
+        <td id="eval_outcome_{{ ev.codename }}">{{ ev.outcome }}</td>
+        <td style="text-align: center">
+          <input type="checkbox" disabled{{ " checked" if s.token is not None or ev.testcase.public else "" }}>
+        </td>
+        <td id="eval_text_{{ ev.codename }}">{{ format_status_text(ev.text) }}</td>
         <td>{{ ev.evaluation_shard }}</td>
         <td>
           {% if ev.execution_time is not None %}

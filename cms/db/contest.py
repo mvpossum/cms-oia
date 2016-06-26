@@ -3,10 +3,11 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2012 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2013 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2013 Bernard Blackham <bernard@largestprime.net>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -87,6 +88,40 @@ class Contest(Base):
         Boolean,
         nullable=False,
         default=True)
+
+    # Whether the user question is enabled.
+    allow_questions = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether the user test interface is enabled.
+    allow_user_tests = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether to prevent hidden participations to log in.
+    block_hidden_participations = Column(
+        Boolean,
+        nullable=False,
+        default=False)
+
+    # Whether to enforce that the IP address of the request matches
+    # the IP address or subnet specified for the participation (if
+    # present).
+    ip_restriction = Column(
+        Boolean,
+        nullable=False,
+        default=True)
+
+    # Whether to automatically log in users connecting from an IP
+    # address specified in the ip field of a participation to this
+    # contest.
+    ip_autologin = Column(
+        Boolean,
+        nullable=False,
+        default=False)
 
     # The parameters that control contest-tokens follow. Note that
     # their effect during the contest depends on the interaction with

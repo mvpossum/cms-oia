@@ -1,7 +1,14 @@
 {# This snippet shows a row of a submission table using the variable s as input #}
 {% from cms.grading import format_status_text %}
-{% set dataset = s.task.active_dataset %}
+
+{% try %}
+  {% set dataset = shown_dataset %}
+{% except %}
+  {% set dataset = s.task.active_dataset %}
+{% end %}
+
 {% set sr = s.get_result(dataset) %}
+
 {# The submission result might be missing in some cases (e.g., cloned dataset); these cases are equivalent to the compiling state. #}
 {% set status = SubmissionResult.COMPILING %}
 {% if sr is not None %}
@@ -39,20 +46,22 @@
         <table class="nested bordered">
           <thead>
             <tr>
+              <th>#</th>
+              <th>Codename</th>
               <th>Outcome</th>
-              <th></th>
+              <th>Visible</th>
               <th>Details</th>
             </tr>
           </thead>
           <tbody>
-            {% for idx, ev in sorted((ev.codename, ev) for ev in sr.evaluations) %}
+            {% for idx, ev in enumerate(zip(*sorted((ev.codename, ev) for ev in sr.evaluations))[1], start=1) %}
             <tr>
+              <td>{{ idx }}</td>
+              <td>{{ ev.codename }}</td>
               <td>{{ ev.outcome }}</td>
-              {% if s.token is not None or ev.testcase.public %}
-              <td style="align: center;">&bullet;</td>
-              {% else %}
-              <td></td>
-              {% end %}
+              <td style="text-align: center">
+                <input type="checkbox" disabled{{ " checked" if s.token is not None or ev.testcase.public else "" }}>
+              </td>
               <td>{{ ev.text }}</td>
             </tr>
             {% end %}
@@ -102,9 +111,9 @@
     {{ s.short_comment }}
   </td>
   <td>
-    {% set reevaluation_par_name = "submission" %}
-    {% set reevaluation_par_value = s.id %}
-    {% set reevaluation_par_dataset_id = None %}
-    {% include reevaluation_buttons.html %}
+    {% module ReevaluationButtons(
+           url_root,
+           submission_id=s.id,
+           dataset_id=dataset.id) %}
   </td>
 </tr>

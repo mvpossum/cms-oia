@@ -3,13 +3,14 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2014 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2015 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2013 Bernard Blackham <bernard@largestprime.net>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
 # Copyright © 2014 Fabian Gundlach <320pointsguy@gmail.com>
 # Copyright © 2015 William Di Luigi <williamdiluigi@gmail.com>
+# Copyright © 2016 Myungwoo Chun <mc.tamaki@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -46,9 +47,10 @@ from werkzeug.datastructures import LanguageAccept
 from werkzeug.http import parse_accept_header
 
 from cms import config
-from cms.db import Contest, Participation, Session, User
+from cms.db import Contest, Participation, User
 from cms.server import CommonRequestHandler, compute_actual_phase, \
-    file_handler_gen, get_url_root, filter_language_codes
+    file_handler_gen, get_url_root
+from cms.locale import filter_language_codes
 from cmscommon.datetime import get_timezone, make_datetime, make_timestamp
 from cmscommon.isocodes import translate_language_code, \
     translate_language_country_code
@@ -88,14 +90,8 @@ class BaseHandler(CommonRequestHandler):
 
     """
 
-    # Whether the login cookie duration has to be refreshed when
-    # this handler is called. Useful to filter asynchronous
-    # requests.
-    refresh_cookie = True
-
     def __init__(self, *args, **kwargs):
         super(BaseHandler, self).__init__(*args, **kwargs)
-        self.timestamp = None
         self.cookie_lang = None
         self.browser_lang = None
         self.langs = None
@@ -105,11 +101,7 @@ class BaseHandler(CommonRequestHandler):
         """This method is executed at the beginning of each request.
 
         """
-        self.timestamp = make_datetime()
-
-        self.set_header("Cache-Control", "no-cache, must-revalidate")
-
-        self.sql_session = Session()
+        super(BaseHandler, self).prepare()
         self.contest = Contest.get_from_id(self.application.service.contest,
                                            self.sql_session)
 
@@ -131,6 +123,24 @@ class BaseHandler(CommonRequestHandler):
         current contest), return None.
 
         """
+        remote_ip = self.request.remote_ip
+        if self.contest.ip_autologin:
+            self.clear_cookie("login")
+            participations = self.sql_session.query(Participation)\
+                .filter(Participation.contest == self.contest)\
+                .filter(Participation.ip == remote_ip)\
+                .all()
+            if len(participations) == 1:
+                return participations[0]
+
+            if len(participations) > 1:
+                logger.error("Multiple users have IP %s." % (remote_ip))
+            else:
+                logger.error("No user has IP %s" % (remote_ip))
+
+            # If IP autologin is set, we do not allow password logins.
+            return None
+
         if self.get_secure_cookie("login") is None:
             return None
 
@@ -184,13 +194,13 @@ class BaseHandler(CommonRequestHandler):
             return None
 
         # Check if user is using the right IP (or is on the right subnet)
-        if config.ip_lock and participation.ip is not None \
+        if self.contest.ip_restriction and participation.ip is not None \
                 and not check_ip(self.request.remote_ip, participation.ip):
             self.clear_cookie("login")
             return None
 
         # Check if user is hidden
-        if participation.hidden and config.block_hidden_users:
+        if participation.hidden and self.contest.block_hidden_participations:
             self.clear_cookie("login")
             return None
 
@@ -211,13 +221,13 @@ class BaseHandler(CommonRequestHandler):
             lang_codes = filter_language_codes(
                 lang_codes, self.contest.allowed_localizations)
 
-        # TODO We fallback on "en" if no language matches: we could
-        # return 406 Not Acceptable instead.
         # Select the one the user likes most.
+        basic_lang = lang_codes[0].replace("_", "-") \
+            if len(self.contest.allowed_localizations) else 'en'
         http_langs = [lang_code.replace("_", "-") for lang_code in lang_codes]
         self.browser_lang = parse_accept_header(
             self.request.headers.get("Accept-Language", ""),
-            LanguageAccept).best_match(http_langs, "en")
+            LanguageAccept).best_match(http_langs, basic_lang)
 
         self.cookie_lang = self.get_cookie("language", None)
 
@@ -261,6 +271,8 @@ class BaseHandler(CommonRequestHandler):
         ret["phase"] = self.contest.phase(self.timestamp)
 
         ret["printing_enabled"] = (config.printer is not None)
+        ret["questions_enabled"] = self.contest.allow_questions
+        ret["testing_enabled"] = self.contest.allow_user_tests
 
         if self.current_user is not None:
             participation = self.current_user
@@ -294,8 +306,17 @@ class BaseHandler(CommonRequestHandler):
         # TODO Now all language names are shown in the active language.
         # It would be better to show them in the corresponding one.
         ret["lang_names"] = {}
+
+        # Get language codes for allowed localizations
+        lang_codes = self.langs.keys()
+        if len(self.contest.allowed_localizations) > 0:
+            lang_codes = filter_language_codes(
+                lang_codes, self.contest.allowed_localizations)
         for lang_code, trans in self.langs.iteritems():
             language_name = None
+            # Filter lang_codes with allowed localizations
+            if lang_code not in lang_codes:
+                continue
             try:
                 language_name = translate_language_country_code(
                     lang_code, trans)

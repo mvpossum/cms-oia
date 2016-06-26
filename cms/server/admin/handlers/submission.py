@@ -3,7 +3,7 @@
 
 # Contest Management System - http://cms-dev.github.io/
 # Copyright © 2010-2013 Giovanni Mascellani <mascellani@poisson.phc.unipi.it>
-# Copyright © 2010-2015 Stefano Maggiolo <s.maggiolo@gmail.com>
+# Copyright © 2010-2016 Stefano Maggiolo <s.maggiolo@gmail.com>
 # Copyright © 2010-2012 Matteo Boscariol <boscarim@hotmail.com>
 # Copyright © 2012-2014 Luca Wehrstedt <luca.wehrstedt@gmail.com>
 # Copyright © 2014 Artem Iglikov <artem.iglikov@gmail.com>
@@ -33,7 +33,7 @@ from __future__ import unicode_literals
 from cms.db import Dataset, File, Submission
 from cmscommon.datetime import make_datetime
 
-from .base import BaseHandler, FileHandler
+from .base import BaseHandler, FileHandler, require_permission
 
 
 class SubmissionHandler(BaseHandler):
@@ -43,9 +43,11 @@ class SubmissionHandler(BaseHandler):
     compile please check'.
 
     """
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, submission_id, dataset_id=None):
         submission = self.safe_get_item(Submission, submission_id)
         task = submission.task
+        self.contest = task.contest
 
         if dataset_id is not None:
             dataset = self.safe_get_item(Dataset, dataset_id)
@@ -69,6 +71,7 @@ class SubmissionFileHandler(FileHandler):
 
     """
     # FIXME: Replace with FileFromDigestHandler?
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, file_id):
         sub_file = self.safe_get_item(File, file_id)
         submission = sub_file.submission
@@ -86,6 +89,7 @@ class SubmissionCommentHandler(BaseHandler):
     """Called when the admin comments on a submission.
 
     """
+    @require_permission(BaseHandler.PERMISSION_ALL)
     def post(self, submission_id, dataset_id=None):
         submission = self.safe_get_item(Submission, submission_id)
 
@@ -110,6 +114,7 @@ class SubmissionCommentHandler(BaseHandler):
 
 class FileFromDigestHandler(FileHandler):
 
+    @require_permission(BaseHandler.AUTHENTICATED)
     def get(self, digest, filename):
         # TODO: Accept a MIME type
         self.sql_session.close()
