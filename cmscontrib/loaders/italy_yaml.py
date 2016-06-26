@@ -153,10 +153,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         args = {}
 
-        if not "name" in conf and not "nome_breve" in conf:
-            args["name"]=name
-        else:
-            load(conf, args, ["name", "nome_breve"])
+        load(conf, args, ["name", "nome_breve"])
         load(conf, args, ["description", "nome"])
 
         logger.info("Loading parameters for contest %s.", args["name"])
@@ -213,12 +210,8 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         load(conf, args, "restrict_level")
         load(conf, args, "enable_categories")
         load(conf, args, "show_time")
-        
-        if not "tasks" in conf and not "problemi" in conf:
-            tasks = [name  for name in os.listdir(self.path) if os.path.isfile(os.path.join(self.path, name, "task.yaml")) ]
-        else:
-            tasks = load(conf, None, ["tasks", "problemi"])
 
+        tasks = load(conf, None, ["tasks", "problemi"])
         participations = load(conf, None, ["users", "utenti"])
 
         # Import was successful
@@ -246,7 +239,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         args = {}
 
         conf = load(conf, None, ["users", "utenti"])
-        
+
         if os.path.exists(os.path.join(os.path.dirname(self.path),
                                            "users.csv")):
             translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password'}
@@ -349,23 +342,24 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         touch(os.path.join(self.path, ".import_error"))
 
         args = {}
-        if not "name" in conf and not "nome_breve" in conf:
-            args["name"]=name
-        else:
-            load(conf, args, ["name", "nome_breve"])
-            
-        if not "title" in conf and not "nome" in conf:
-            args["title"]=name
-        else:
-            load(conf, args, ["title", "nome"])
-        
+
+        load(conf, args, ["name", "nome_breve"])
+        load(conf, args, ["title", "nome"])
         load(conf, args, ["category"])
 
-        assert name == args["name"]
+        if name != args["name"]:
+            logger.info("The task name (%s) and the directory name (%s) are "
+                        "different. The former will be used.", args["name"],
+                        name)
 
         if args["name"] == args["title"]:
             logger.warning("Short name equals long name (title). "
                            "Please check.")
+
+        name = args["name"]
+
+        logger.info("Loading parameters for task %s.", name)
+
         if get_statement:
             primary_language = load(conf, None, "primary_language")
             if primary_language is None:
@@ -594,11 +588,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             args["score_type"] = "Sum"
             total_value = float(conf.get("total_value", 100.0))
             input_value = 0.0
-            if 'n_input' in conf:
-                n_input = int(conf['n_input'])
-            else:
-                _, _, files = os.walk(os.path.join(self.path, "input")).next()
-                n_input = len(files)
+            n_input = int(conf['n_input'])
             if n_input != 0:
                 input_value = total_value / n_input
             args["score_type_parameters"] = "%s" % input_value
@@ -673,7 +663,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                 os.path.join(self.path, "output", "output%d.txt" % i),
                 "Output %d for task %s" % (i, task.name))
             args["testcases"] += [
-                Testcase("%03d" % i, not "public_testcases" in conf, input_digest, output_digest)]
+                Testcase("%03d" % i, False, input_digest, output_digest)]
             if args["task_type"] == "OutputOnly":
                 task.attachments += [
                     Attachment("input_%03d.txt" % i, input_digest)]

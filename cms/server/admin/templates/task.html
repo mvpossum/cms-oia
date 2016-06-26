@@ -66,18 +66,18 @@ $("select[name=task_type_{{ dataset.id }}]").change(function() {
       </tr>
       <tr>
         <td>
+          <span class="info" title="The index of the task within the contest, if the task is associated with a contest."></span>
+          Position
+        </td>
+        <td>{{ task.num }}</td>
+      </tr>
+      <tr>
+        <td>
           <span class="info" title="The category of the task as seen by the contestants."></span>
           Category
         </td>
         <td><input type="text" name="category" value="{{ task.category }}"/></td>
       </tr>
-      <tr>
--        <td>
--          <span class="info" title="The index of the task within the contest, if the task is associated with a contest."></span>
--          Position
--        </td>
-         <td>{{ task.num }}</td>
-       </tr>
       <tr>
         <td>
           <span class="info" title="The statements of this task, by language code."></span>
