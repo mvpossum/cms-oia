@@ -75,12 +75,12 @@ abbr {
 
 #InnerFrame {
     position: absolute;
-    top: 3em;
+    top: 0em;
     left: 220px;
     right: 0;
     bottom: 0;
     margin: 2px 0 0 2px;
-    padding: 0 3em;
+    padding: 0 1em;
     overflow-y: scroll;
 }
 
@@ -374,7 +374,8 @@ abbr {
 .scoreboard {
     width: 100%;
     table-layout: fixed;
-    margin: 3em 0;
+    margin: 0em 0;
+    margin-bottom: 2em;
 }
 
 .scoreboard_cols col.sel {

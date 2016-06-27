@@ -215,7 +215,7 @@ class Task(Base):
         
     category = Column(
         Unicode,
-        nullable=False)
+        nullable=True)
 
     # Follows the description of the fields automatically added by
     # SQLAlchemy.
