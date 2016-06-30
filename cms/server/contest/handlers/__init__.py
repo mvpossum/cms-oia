@@ -34,7 +34,6 @@ from .base import \
     StaticFileGzHandler
 from .main import \
     MainHandler, \
-    RegisterHandler, \
     LoginHandler, \
     LogoutHandler, \
     StartHandler, \
@@ -62,6 +61,8 @@ from .taskusertest import \
 from .communication import \
     CommunicationHandler, \
     QuestionHandler
+from .registration import \
+    RegisterHandler
 
 
 HANDLERS = [

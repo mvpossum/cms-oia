@@ -261,18 +261,27 @@
     </tr>
     <tr>
       <td>
-        <span class="info" title="Task list will be classified according to the category of each problem"></span>
+        <span class="info" title="Task list will be classified according to the category of each problem."></span>
         Enable categories
       </td>
       <td><input type="checkbox" id="categories_enabled" name="categories_enabled" {{ "checked" if contest.categories_enabled else "" }}/></td>
     </tr>
     <tr>
       <td>
-        <span class="info" title="Hide time left from contestants"></span>
+        <span class="info" title="Hide time left from contestants."></span>
         Show time left to participants
       </td>
       <td>
         <input type="checkbox" id="show_time" name="show_time" {{ "checked" if contest.show_time else "" }}/>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <span class="info" title="Wether users can create accounts using their emails."></span>
+        Online registration
+      </td>
+      <td>
+        <input type="checkbox" id="online_registration" name="online_registration" {{ "checked" if contest.online_registration else "" }}/>
       </td>
     </tr>
   </table>

@@ -126,6 +126,7 @@ class ContestHandler(SimpleContestHandler("contest.html")):
             self.get_bool(attrs, "restrict_level")
             self.get_bool(attrs, "categories_enabled")
             self.get_bool(attrs, "show_time")
+            self.get_bool(attrs, "online_registration")
 
             # Update the contest.
             contest.set_attrs(attrs)
