@@ -72,6 +72,7 @@ class User(Entity):
         self.validate(data)
         self.f_name = data['f_name']
         self.l_name = data['l_name']
+        self.school = data['school']
         self.team = data['team']
 
     def get(self):

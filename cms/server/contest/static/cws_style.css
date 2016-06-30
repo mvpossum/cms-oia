@@ -217,6 +217,21 @@ div.login_box {
     }
 }
 
+@media (min-width: 980px) and (min-height: 468px) {
+    div.register_container {
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin-top: 100px;
+        padding: 0 20px;
+    }
+
+    div.register_box {
+        /* The total height of the box is 2*60 (padding) + 60 (h2) +
+           (27+9) (p) + 2*(28+18) (inputs) + 40 (buttons) = 348px; */
+    }
+}
+
 /* Some fixes and enhancements of Bootstrap */
 
 @media (max-width: 767px) {

@@ -98,6 +98,32 @@ class User(Base):
         String,
         nullable=False,
         default="[]")
+    
+    # OIA user data
+    school = Column(
+        Unicode,
+        nullable=True)
+        
+    province = Column(
+        Unicode,
+        nullable=True)
+        
+    city = Column(
+        Unicode,
+        nullable=True)
+        
+    birthdate = Column(
+        DateTime,
+        nullable=True)
+    
+    activation_code = Column(
+        String,
+        nullable=True)
+    
+    activation_expire = Column(
+        DateTime,
+        nullable=True)
+    
 
     # Follows the description of the fields automatically added by
     # SQLAlchemy.

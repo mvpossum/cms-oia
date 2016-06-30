@@ -12,3 +12,5 @@ cache/
 lib/
 log/
 util_scripts/conf/*
+cms/server/contest/handlers/secret_code.py
+ejemplo/.itime_contest

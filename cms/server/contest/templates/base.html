@@ -89,6 +89,14 @@ $(document).ready(function () {
             </div>
         </div>
     {% end %}
+    {% if handler.get_argument("msg", "") != "" %}
+        <div id="notifications" class="notifications">
+            <div class="alert alert-block alert-success notification">
+                <a class="close" data-dismiss="alert" href="#">&#xD7;</a>
+                <h4 class="alert-heading">{{ handler.get_argument("msg", "") }}</h4>
+            </div>
+        </div>
+    {% end %}
         <div class="login_container">
             <div class="login_box hero-unit">
                 <h1>{{ _("Welcome") }}</h1>
@@ -111,14 +119,12 @@ $(document).ready(function () {
                         <div class="control-group">
                             <div class="controls">
                                 <button type="submit" class="btn btn-primary btn-large">{{ _("Login") }}</button>
-                                <button type="reset" class="btn btn-large">{{ _("Reset") }}</button>
+                                <a href="/register" class="btn btn-large">Registrarse</a>
                             </div>
                         </div>
                     </fieldset>
                 </form>
             </div>
-            </br><div style="margin:0 auto;width:501px">  Para obtener un usuario, por favor complete el siguiente formulario <a href="http://bit.ly/oiapedidousuario" >bit.ly/oiapedidousuario</a>.</div>
-
         </div>
 {% else %}
         <div id="notifications" class="notifications"></div>

@@ -1,0 +1,166 @@
+{% import re %}
+{% import time %}
+{% import json %}
+{% from cms import LANGUAGE_NAMES, LANGUAGE_TO_SOURCE_EXT_MAP %}
+{% from cms.server import format_amount_of_time, format_time, format_datetime, format_datetime_smart, get_score_class, encode_for_url %}
+{% from cms.grading import COMPILATION_MESSAGES, EVALUATION_MESSAGES %}
+{% from cms.db import SubmissionResult %}
+{% from cmscommon.datetime import make_timestamp, utc %}
+{% from cmscommon.isocodes import translate_language_country_code %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script type="text/javascript">
+        </script>
+        <link rel="shortcut icon" href="{{ url_root }}/static/favicon.ico" />
+        <script type="text/javascript" src="{{ url_root }}/static/jq/jquery-1.7.1.min.js"></script>
+        <script type="text/javascript" src="{{ url_root }}/static/js/bootstrap.js"></script>
+        <script type="text/javascript" src="{{ url_root }}/static/cws_utils.js"></script>
+        <script src='https://www.google.com/recaptcha/api.js'></script>
+        <link rel="stylesheet" href="{{ url_root }}/static/css/bootstrap.css">
+        <link rel="stylesheet" href="{{ url_root }}/static/cws_style.css">
+        <link rel="stylesheet" href="{{ url_root }}/static/css/menutree.css">
+
+        <title>{{ contest.description }}</title>
+
+        <script type="text/javascript">
+{% if current_user is None %}
+var utils = new CMS.CWSUtils("{{ url_root }}",
+                             0, 0, 0, 0, 0);
+{% else %}
+// FIXME use Date objects
+var utils = new CMS.CWSUtils("{{ url_root }}",
+                             {{ make_timestamp(timestamp) }},
+                             {% comment What we do is: if timezone is +HH:MM we return the UNIX timestamp + 3600*HH + 60*MM. %}
+                             {{ make_timestamp(timestamp.replace(tzinfo=utc).astimezone(timezone).replace(tzinfo=None)) }},
+                             {{ make_timestamp(current_phase_begin) }},
+                             {{ make_timestamp(current_phase_end) }},
+                             {{ actual_phase }});
+$(document).ready(function () {
+    utils.update_time({{ "true" if contest.per_user_time is not None else "false" }});
+    setInterval(function() {
+        utils.update_time({{ "true" if contest.per_user_time is not None else "false" }});
+    }, 1000);
+    utils.update_notifications();
+    setInterval(function() { utils.update_notifications(); }, 30000);
+    $('#main').css('top', $('#navigation_bar').outerHeight());
+});
+
+{% block js %}{% end %}
+{% end%}
+        </script>
+
+    </head>
+    <body id="body">
+        <div id="navigation_bar" class="navbar navbar-fixed-top">
+            <div class="navbar-inner">
+                <div class="container">
+                    <a class="brand" href="{{ url_root }}/">{{ contest.description }}</a>
+{% if current_user is not None %}
+                    <p class="navbar-text pull-right">
+    {% if current_user.user.username[0]=='1' or current_user.user.username[0]=='2' or current_user.user.username[0]=='3' or current_user.user.username[0]=='x' %}
+                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>, level <strong>%(lvl)s</strong>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username, "lvl": current_user.user.username[0]} %}
+    {% else %}
+                        {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username} %}
+    {% end %}
+                        <a class="btn btn-warning" href="{{ url_root }}/logout">{{ _("Logout") }}</a>
+                    </p>
+{% end %}
+                </div>
+            </div>
+        </div>
+{% if current_user is None %}
+    {% if handler.get_argument("register_error", "") != "" %}
+        <div id="notifications" class="notifications">
+            <div class="alert alert-block alert-error notification">
+                <a class="close" data-dismiss="alert" href="#">&#xD7;</a>
+                <h4 class="alert-heading">{{ handler.get_argument("register_error", "") }}</h4>
+            </div>
+        </div>
+    {% end %}
+        <div class="register_container">
+            <div class=" hero-unit">
+                <h1>Registro de usuario</h1>
+                <p>Por favor complete sus datos. El uso de datos falsos puede llevar a la eliminación sin aviso de su cuenta.</p>
+                <form class="form-horizontal" action="{{ url_root }}/register" method="POST">
+                    <fieldset>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">{{ _("Username") }}</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" name="username">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">{{ _("Password") }}</label>
+                            <div class="controls">
+                                <input type="password" class="input-xlarge" name="password">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Email</label>
+                            <div class="controls">
+                                <input type="email" class="input-xlarge" name="email">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Nombre</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" name="first_name">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Apellido</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" name="last_name">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Provincia</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" name="province">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Ciudad</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" name="city">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Escuela</label>
+                            <div class="controls">
+                                <input type="text" class="input-xlarge" name="school">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">Fecha de Nacimiento</label>
+                            <div class="controls">
+                                <input type="date" class="input-xlarge" name="birthdate">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <div class="g-recaptcha" data-sitekey="6LdLziMTAAAAAH25_Ok3QWjgOdniv9lIr_HIMsxc"></div>
+                        </div>
+                        <div class="control-group">
+                            <div class="controls">
+                                <button type="submit" class="btn btn-primary btn-large">Registrarse</button>
+                                <button type="reset" class="btn btn-large">{{ _("Reset") }}</button>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+
+        </div>
+{% else %}
+    <div id="notifications" class="notifications">
+        <div class="alert alert-block alert-error notification">
+            <a class="close" data-dismiss="alert" href="#">&#xD7;</a>
+            <h4 class="alert-heading">{{ _("Ya iniciaste sesion.") }}</h4>
+        </div>
+    </div>
+{% end %}
+    </body>
+</html>

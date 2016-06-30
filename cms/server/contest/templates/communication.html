@@ -12,17 +12,19 @@
 <h2>{{ _("Announcements") }}</h2>
 <div class="announcement_list">
     {% for msg in reversed(contest.announcements) %}
-    <div class="announcement">
-        {% if msg.subject != '' %}
-        <h4 class="subject">{{ msg.subject }}</h4>
-        {% else %}
-        <h4 class="subject empty">{{ _("(no subject)") }}</h4>
+        {% if msg.timestamp < timestamp %}
+        <div class="announcement">
+            {% if msg.subject != '' %}
+            <h4 class="subject">{{ msg.subject }}</h4>
+            {% else %}
+            <h4 class="subject empty">{{ _("(no subject)") }}</h4>
+            {% end %}
+            <span class="timestamp">{{ format_datetime_smart(msg.timestamp, timezone, locale=locale) }}</span>
+            {% if msg.text != '' %}
+            <div class="body">{% raw xhtml_escape(msg.text).replace('\n', '<br/>') %}</div>
+            {% end %}
+        </div>
         {% end %}
-        <span class="timestamp">{{ format_datetime_smart(msg.timestamp, timezone, locale=locale) }}</span>
-        {% if msg.text != '' %}
-        <div class="body">{% raw xhtml_escape(msg.text).replace('\n', '<br/>') %}</div>
-        {% end %}
-    </div>
     {% end %}
 </div>
 {% end %}

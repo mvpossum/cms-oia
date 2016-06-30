@@ -47,6 +47,7 @@ from .contestsubmission import \
     ContestSubmissionsHandler
 from .contestannouncement import \
     AddAnnouncementHandler, \
+    TimeLeftAnnouncementHandler, \
     AnnouncementHandler
 from .contestquestion import \
     QuestionsHandler, \
@@ -132,6 +133,7 @@ HANDLERS = [
     (r"/contest/([0-9]+)/announcements",
      SimpleContestHandler("announcements.html")),
     (r"/contest/([0-9]+)/announcements/add", AddAnnouncementHandler),
+    (r"/contest/([0-9]+)/announcements/timeleft", TimeLeftAnnouncementHandler),
     (r"/contest/([0-9]+)/announcement/([0-9]+)", AnnouncementHandler),
 
     # Contest's questions

@@ -341,6 +341,7 @@ class ProxyService(TriggeredService):
                     users[encode_id(user.username)] = {
                         "f_name": user.first_name,
                         "l_name": user.last_name,
+                        "school": user.school if user.school is not None else None,
                         "team": team.code if team is not None else None,
                     }
                     if team is not None:

@@ -9,10 +9,9 @@ import random
 def genpass():
     if len(argv)==4:
         return argv[3]
-    with open('wordlist.txt', 'r') as wordfile:
-        words=[s.strip() for s in wordfile.read().split('\n') if s.strip()]
-    pw_length = 3
-    return '.'.join([words[random.randrange(len(words))] for _ in range(pw_length)])
+    alphabet = "abcdefghijkmnopqrstuvwxyz23456789?."
+    pw_length = 6
+    return ''.join([alphabet[random.randrange(len(alphabet))] for _ in range(pw_length)])
     
 if len(argv)!=3 and len(argv)!=4:
     print ("Adds usernames and passwords data\nUsage: {exe} form.csv output.csv [password]".format(exe=argv[0]))

@@ -23,6 +23,12 @@
                  value="Add announcement" />
         </form>
       </div>
+      <div class="notification_msg">
+        <form method="post" action="{{ url_root }}/contest/{{ contest.id }}/announcements/timeleft">
+          <input type="submit"
+                 value="Add Time Left announcements" />
+        </form>
+      </div>
     </div>
 {% end %}
     {% if contest.announcements != [] %}

@@ -37,7 +37,7 @@ from cms.db import Contest, Announcement
 from cmscommon.datetime import make_datetime
 
 from .base import BaseHandler, require_permission
-
+from datetime import timedelta
 
 class AddAnnouncementHandler(BaseHandler):
     """Called to actually add an announcement
@@ -57,6 +57,32 @@ class AddAnnouncementHandler(BaseHandler):
         else:
             self.application.service.add_notification(
                 make_datetime(), "Subject is mandatory.", "")
+        self.redirect("/contest/%s/announcements" % contest_id)
+        
+class TimeLeftAnnouncementHandler(BaseHandler):
+    """Called to actually add an announcement
+
+    """
+    @require_permission(BaseHandler.PERMISSION_MESSAGING)
+    def post(self, contest_id):
+        self.contest = self.safe_get_item(Contest, contest_id)
+        
+        ann = Announcement(self.contest.stop-timedelta(hours=2), 'Quedan 2 horas', 'La competencia finalizará en dos hora.',
+                           contest=self.contest)
+        self.sql_session.add(ann)
+        ann = Announcement(self.contest.stop-timedelta(hours=1), 'Queda 1 hora', 'La competencia finalizará en una horas.',
+                           contest=self.contest)
+        self.sql_session.add(ann)
+        ann = Announcement(self.contest.stop-timedelta(minutes=30), 'Quedan 30 minutos', 'La competencia finalizará en treinta minutos.',
+                           contest=self.contest)
+        self.sql_session.add(ann)
+        ann = Announcement(self.contest.stop-timedelta(minutes=15), 'Quedan 15 minutos', 'La competencia finalizará en quince minutos.',
+                           contest=self.contest)
+        self.sql_session.add(ann)
+        ann = Announcement(self.contest.stop-timedelta(minutes=5), 'Quedan 5 minutos', 'La competencia finalizará en cinco minutos.',
+                           contest=self.contest)
+        self.sql_session.add(ann)
+        self.try_commit()
         self.redirect("/contest/%s/announcements" % contest_id)
 
 

@@ -73,6 +73,10 @@ class UserHandler(BaseHandler):
             self.get_string(attrs, "email")
             self.get_string(attrs, "preferred_languages")
             self.get_string(attrs, "timezone", empty=None)
+            self.get_string(attrs, "school")
+            self.get_string(attrs, "province")
+            self.get_string(attrs, "city")
+            self.get_datetime(attrs, "birthdate")
 
             assert attrs.get("username") is not None, \
                 "No username specified."

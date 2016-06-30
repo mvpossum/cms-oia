@@ -34,6 +34,7 @@ from .base import \
     StaticFileGzHandler
 from .main import \
     MainHandler, \
+    RegisterHandler, \
     LoginHandler, \
     LogoutHandler, \
     StartHandler, \
@@ -68,6 +69,7 @@ HANDLERS = [
     # Main
 
     (r"/", MainHandler),
+    (r"/register", RegisterHandler),
     (r"/login", LoginHandler),
     (r"/logout", LogoutHandler),
     (r"/start", StartHandler),
