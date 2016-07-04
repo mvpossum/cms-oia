@@ -233,6 +233,11 @@ class Contest(Base):
         nullable=False,
         default=0)
 
+    hide_task_prefix = Column(
+        Integer,
+        nullable=False,
+        default=0)
+        
     restrict_level = Column(
         Boolean,
         nullable=False,

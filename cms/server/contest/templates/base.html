@@ -193,7 +193,7 @@ $(document).ready(function () {
             {% for t_iter in contest.tasks %}
                 {% if not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x" %}
                                 <li class="nav-header">
-                                    {{ t_iter.name }}
+                                    {{ t_iter.name[contest.hide_task_prefix:] }}
                                 </li>
                                 <li{% if request.path == '/tasks/%s/description' % encode_for_url(t_iter.name) %} class="active"{% end %}>
                                     <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
@@ -215,7 +215,7 @@ $(document).ready(function () {
                 <div class="nav nav-list collapse{% if actcat==cate %} in{% end %} accordion-group" id="C{{ cate.replace(' ', 'x').replace('.','y') }}" style="border:0">
                 {% for t_iter in contest.tasks %}
                     {% if t_iter.category==cate and (not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x") %}
-                            <div class="menu_label nav-header" style="cursor:pointer;{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %}color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;{% end %}" data-toggle="collapse" data-target="#P{{ t_iter.name.replace(' ', 'x').replace('.','y') }}" data-parent="#C2{{ cate.replace(' ', 'x').replace('.','y') }}">{{ t_iter.name }}</div>
+                            <div class="menu_label nav-header" style="cursor:pointer;{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %}color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;{% end %}" data-toggle="collapse" data-target="#P{{ t_iter.name.replace(' ', 'x').replace('.','y') }}" data-parent="#C2{{ cate.replace(' ', 'x').replace('.','y') }}">{{ t_iter.name[contest.hide_task_prefix:] }}</div>
                             <ol class="nav nav-list collapse{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} in{% end %}" id="P{{ t_iter.name.replace(' ', 'x').replace('.','y') }}">
 
                                 <li>
