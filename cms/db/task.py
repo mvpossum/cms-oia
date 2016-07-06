@@ -217,6 +217,11 @@ class Task(Base):
         Unicode,
         nullable=True)
 
+    hide_task_prefix = Column(
+        Integer,
+        nullable=False,
+        default=0)
+
     # Follows the description of the fields automatically added by
     # SQLAlchemy.
     # datasets (list of Dataset objects)

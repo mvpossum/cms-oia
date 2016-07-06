@@ -59,6 +59,13 @@ $("select[name=task_type_{{ dataset.id }}]").change(function() {
       </tr>
       <tr>
         <td>
+          <span class="info" title="How many letters at the left of the task name should be hidden"></span>
+          Len of hidden task prefix
+        </td>
+        <td><input type="text" id="hide_task_prefix" name="hide_task_prefix" value="{{ int(task.hide_task_prefix) }}"/></td>
+      </tr>
+      <tr>
+        <td>
           <span class="info" title="The title of the task as seen by the contestants."></span>
           Title
         </td>

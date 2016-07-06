@@ -210,7 +210,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         load(conf, args, "restrict_level")
         load(conf, args, "enable_categories")
         load(conf, args, "show_time")
-        load(conf, args, "hide_task_prefix")
 
         tasks = load(conf, None, ["tasks", "problemi"])
         participations = load(conf, None, ["users", "utenti"])
@@ -353,6 +352,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         load(conf, args, ["name", "nome_breve"])
         load(conf, args, ["title", "nome"])
+        load(conf, args, "hide_task_prefix")
         
         if "category" in args:
             load(conf, args, ["category"])
