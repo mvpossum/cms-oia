@@ -183,43 +183,32 @@ class RegisterHandler(BaseHandler):
         attrs['first_name'] = self.get_argument("first_name", "").strip()
         attrs['last_name'] = self.get_argument("last_name", "").strip()
         attrs['email'] = self.get_argument("email", "").strip()
-        attrs['province'] = self.get_argument("province", "").strip()
         attrs['city'] = self.get_argument("city", "").strip()
         attrs['school'] = self.get_argument("school", "").strip()
-        attrs['birthdate'] = self.get_argument("birthdate", "")
-        try:
-            attrs['birthdate'] = datetime.strptime(attrs['birthdate'], '%Y-%m-%d')
-            attrs['birthdate'] = datetime.combine(attrs['birthdate'], datetime.min.time())
-        except Exception as err:
-            fail_redirect('La fecha de nacimiento es invalida.')
+        
+        if len(attrs['username'])<3:
+            fail_redirect('El usuario tiene que tener al menos 3 caracteres.')
             return
-            
-        if len(attrs['username'])<6:
-            fail_redirect('El usuario tiene que tener al menos 6 caracteres.')
-            return
-        if len(attrs['password'])<6:
-            fail_redirect('La clave tiene que tener al menos 6 caracteres.')
+        if len(attrs['password'])<3:
+            fail_redirect('La clave tiene que tener al menos 3 caracteres.')
             return
         if not re.match(r"[A-Za-z0-9]*$", attrs['password']):
             fail_redirect('La clave sólo puede tener letras y números.')
             return
-        if len(attrs['first_name'])<2:
-            fail_redirect('El nombre tiene que tener al menos 2 caracteres.')
+        if len(attrs['first_name'])<3:
+            fail_redirect('El nombre tiene que tener al menos 3 caracteres.')
             return
-        if len(attrs['last_name'])<2:
-            fail_redirect('El apellido tiene que tener al menos 2 caracteres.')
+        if len(attrs['last_name'])<3:
+            fail_redirect('El apellido tiene que tener al menos 3 caracteres.')
             return
         if not re.match(r"([^@|\s]+@[^@]+\.[^@|\s]+)", attrs['email']):
             fail_redirect('Email invalido.')
             return
-        if len(attrs['province'])<5:
-            fail_redirect('La provincia tiene que tener al menos 5 caracteres.')
+        if len(attrs['city'])<3:
+            fail_redirect('La ciudad tiene que tener al menos 3 caracteres.')
             return
-        if len(attrs['city'])<5:
-            fail_redirect('La ciudad tiene que tener al menos 5 caracteres.')
-            return
-        if len(attrs['school'])<6:
-            fail_redirect('La escuela tiene que tener al menos 6 caracteres.')
+        if len(attrs['school'])<3:
+            fail_redirect('La escuela tiene que tener al menos 3 caracteres.')
             return      
                   
         url = 'https://www.google.com/recaptcha/api/siteverify'
