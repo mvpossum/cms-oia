@@ -253,6 +253,22 @@ class Contest(Base):
         nullable=False,
         default=False)
 
+    captcha_client_code = Column(
+        Unicode,
+        nullable=True)
+        
+    captcha_server_code = Column(
+        Unicode,
+        nullable=True)
+        
+    gmail_sender = Column(
+        Unicode,
+        nullable=True)
+        
+    gmail_password = Column(
+        Unicode,
+        nullable=True)
+
     # Follows the description of the fields automatically added by
     # SQLAlchemy.
     # tasks (list of Task objects)

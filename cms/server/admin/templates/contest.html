@@ -251,6 +251,44 @@
       <td><input type="text" name="min_user_test_interval" value="{{ int(contest.min_user_test_interval.total_seconds()) if contest.min_user_test_interval is not None else "" }}"></td>
     </tr>
 
+   <tr><td colspan=2><h2>Online registration</h2></td></tr>
+    <tr>
+      <td>
+        <span class="info" title="Wether users can create accounts using their emails."></span>
+        Online registration
+      </td>
+      <td>
+        <input type="checkbox" id="online_registration" name="online_registration" {{ "checked" if contest.online_registration else "" }}/>
+      </td>
+    <tr>
+      <td>
+        <span class="info" title="Google Recaptcha given code for the client."></span>
+        Captcha client code
+      </td>
+      <td><input type="text" name="captcha_client_code" value="{{ contest.captcha_client_code if contest.captcha_client_code is not None else "" }}"></td>
+    </tr>
+    <tr>
+      <td>
+        <span class="info" title="Google Recaptcha given code for the server."></span>
+        Captcha server code
+      </td>
+      <td><input type="text" name="captcha_server_code" value="{{ contest.captcha_server_code if contest.captcha_server_code is not None else "" }}"></td>
+    </tr>
+    <tr>
+      <td>
+        <span class="info" title="Google account to send user data and confirmation links to registrants."></span>
+        Gmail sender account
+      </td>
+      <td><input type="text" name="gmail_sender" value="{{ contest.gmail_sender if contest.gmail_sender is not None else "" }}"></td>
+    </tr>
+    <tr>
+      <td>
+        <span class="info" title="Google account to send user data and confirmation links to registrants."></span>
+        Gmail sender password
+      </td>
+      <td><input type="password" name="gmail_password" value="{{ contest.gmail_password if contest.gmail_password is not None else "" }}"></td>
+    </tr>
+       
    <tr><td colspan=2><h2>OIA Options</h2></td></tr>
    <tr>
       <td>
@@ -273,15 +311,6 @@
       </td>
       <td>
         <input type="checkbox" id="show_time" name="show_time" {{ "checked" if contest.show_time else "" }}/>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <span class="info" title="Wether users can create accounts using their emails."></span>
-        Online registration
-      </td>
-      <td>
-        <input type="checkbox" id="online_registration" name="online_registration" {{ "checked" if contest.online_registration else "" }}/>
       </td>
     </tr>
   </table>

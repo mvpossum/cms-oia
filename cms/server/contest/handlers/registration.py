@@ -44,7 +44,6 @@ from datetime import datetime
 
 from .base import BaseHandler
 
-from .secret_code import *
 import urllib
 import urllib2
 from tornado import escape
@@ -67,7 +66,7 @@ class MIMEUTF8QPText(MIMEText):
     utf8qp.body_encoding=charset.QP
     self.set_payload(payload, charset=utf8qp) 
 #https://www.google.com/settings/security/lesssecureapps
-def send_email(recipient, subject, body, htmlbody=None):
+def send_email(gmailuser, password, recipient, subject, body, htmlbody=None):
     to = recipient if type(recipient) is list else [recipient]
     msg = MIMEMultipart('alternative')
     msg['Subject'] = subject
@@ -79,11 +78,11 @@ def send_email(recipient, subject, body, htmlbody=None):
     server = smtplib.SMTP("smtp.gmail.com", 587)    
     server.ehlo()
     server.starttls()
-    server.login(secret_mail, secret_pwd)
-    server.sendmail(secret_mail, to, msg.as_string())
+    server.login(gmailuser, password)
+    server.sendmail(gmailuser, to, msg.as_string())
     server.close()
     
-def send_credentials(user, host):
+def send_credentials(gmailuser, password, user, host):
     plain = """\
 Hola, te creamos un usuario para que puedas enviar tus soluciones. Solo
 debes entrar a:
@@ -112,9 +111,9 @@ r los recursos online (apuntes, links, etc):</div><div style=3D"text-align:=
 center"><a href=3D"http://bit.ly/oiapoli" target=3D"_blank"><font size=3D"6=
 ">bit.ly/oiapoli</font></a></div><div><br></div><div>Saludos!</div><div><br=
 ></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host)
-    send_email(user.email, "Juez Online OIA - Credenciales de acceso", plain, html)
+    send_email(gmailuser, password, user.email, "Juez Online OIA - Credenciales de acceso", plain, html)
     
-def send_confirmation_code(user, host):
+def send_confirmation_code(gmailuser, password, user, host):
     link = "http://"+host+"/register?user=3D" + user['username'] + '&code=3D' + user['activation_code']
     plain = """\
 Para poder obtener tu usuario, por favor haz click en la siguiente
@@ -126,7 +125,7 @@ LINK
 <div dir=3D"ltr">Para poder obtener tu usuario, por favor haz click en la s=
 iguiente direcci=C3=B3n:<div><br><div><a href=3D"LINK=
 ">LINK</a></div></div></div>""".replace('LINK', link)
-    send_email(user['email'], "Juez Online OIA - Activar usuario", plain, html)
+    send_email(gmailuser, password, user['email'], "Juez Online OIA - Activar usuario", plain, html)
     
 class RegisterHandler(BaseHandler):
     """Register handler.
@@ -167,7 +166,7 @@ class RegisterHandler(BaseHandler):
                     fail_redirect("Error al activar usuario.")
                     return
                 else:
-                    send_credentials(user, self.request.host)
+                    send_credentials(self.contest.gmail_sender, self.contest.gmail_password, user, self.request.host)
                     self.redirect("/?msg="+escape.url_escape("La cuenta ha sido activada exitosamente. Se envió un mail conteniendo tus credenciales."))
         else:
             self.render("register.html", **self.r_params)
@@ -212,7 +211,7 @@ class RegisterHandler(BaseHandler):
             return      
                   
         url = 'https://www.google.com/recaptcha/api/siteverify'
-        values = {'secret' : secret_code,
+        values = {'secret' : self.contest.captcha_server_code,
                   'response' : self.get_argument("g-recaptcha-response", ""),
                   'remoteip' :  self.request.remote_ip }
         
@@ -253,7 +252,7 @@ class RegisterHandler(BaseHandler):
             user = User(**attrs)
             self.sql_session.add(user)
             self.sql_session.commit()
-            send_confirmation_code(attrs, self.request.host)
+            send_confirmation_code(self.contest.gmail_sender, self.contest.gmail_password, attrs, self.request.host)
         except Exception as error:
             fail_redirect("Error creando usuario.")
         else:

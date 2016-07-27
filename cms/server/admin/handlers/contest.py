@@ -127,6 +127,10 @@ class ContestHandler(SimpleContestHandler("contest.html")):
             self.get_bool(attrs, "categories_enabled")
             self.get_bool(attrs, "show_time")
             self.get_bool(attrs, "online_registration")
+            self.get_string(attrs, "captcha_client_code")
+            self.get_string(attrs, "captcha_server_code")
+            self.get_string(attrs, "gmail_sender")
+            self.get_string(attrs, "gmail_password")
 
             # Update the contest.
             contest.set_attrs(attrs)
