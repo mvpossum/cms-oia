@@ -87,18 +87,6 @@ $(document).ready(function () {
                 <form class="form-horizontal" action="{{ url_root }}/register" method="POST">
                     <fieldset>
                         <div class="control-group">
-                            <label class="control-label" for="input01">{{ _("Username") }}</label>
-                            <div class="controls">
-                                <input type="text" class="input-xlarge" name="username">
-                            </div>
-                        </div>
-                        <div class="control-group">
-                            <label class="control-label" for="input01">{{ _("Password") }}</label>
-                            <div class="controls">
-                                <input type="password" class="input-xlarge" name="password">
-                            </div>
-                        </div>
-                        <div class="control-group">
                             <label class="control-label" for="input01">Email</label>
                             <div class="controls">
                                 <input type="email" class="input-xlarge" name="email">
@@ -117,12 +105,6 @@ $(document).ready(function () {
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label" for="input01">Provincia</label>
-                            <div class="controls">
-                                <input type="text" class="input-xlarge" name="province">
-                            </div>
-                        </div>
-                        <div class="control-group">
                             <label class="control-label" for="input01">Ciudad</label>
                             <div class="controls">
                                 <input type="text" class="input-xlarge" name="city">
@@ -135,9 +117,15 @@ $(document).ready(function () {
                             </div>
                         </div>
                         <div class="control-group">
-                            <label class="control-label" for="input01">Fecha de Nacimiento</label>
+                            <label class="control-label" for="input01">{{ _("Username") }}</label>
                             <div class="controls">
-                                <input type="date" class="input-xlarge" name="birthdate">
+                                <input type="text" class="input-xlarge" name="username">
+                            </div>
+                        </div>
+                        <div class="control-group">
+                            <label class="control-label" for="input01">{{ _("Password") }}</label>
+                            <div class="controls">
+                                <input type="password" class="input-xlarge" name="password">
                             </div>
                         </div>
                         <div class="control-group">
