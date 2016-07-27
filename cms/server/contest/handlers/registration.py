@@ -103,8 +103,8 @@ Saludos!
     html = """\
 <div dir=3D"ltr">Hola, te creamos un usuario para que puedas enviar tus sol=
 uciones. Solo debes entrar a:<div style=3D"text-align:center"><font size=3D=
-"6"><a href=3D"http://HOST" target=3D"_blank">omaforos.com.a=
-r/oia</a></font></div><div style=3D"text-align:center"><br></div><div>Tu cr=
+"6"><a href=3D"http://HOST" target=3D"_blank">HOST=
+</a></font></div><div style=3D"text-align:center"><br></div><div>Tu cr=
 edenciales son:</div><div>Usuario: USERNAME</div><div>Contrase=C3=B1a:=C2=A0=
 PASSWORD</div><div><br></div><div>Cualquier error/problema que te =
 surja no dudes en mandarnos un mail.<br></div><div><br></div><div>No olvida=
