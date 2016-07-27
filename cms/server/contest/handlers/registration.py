@@ -83,11 +83,11 @@ def send_email(recipient, subject, body, htmlbody=None):
     server.sendmail(secret_mail, to, msg.as_string())
     server.close()
     
-def send_credentials(user):
+def send_credentials(user, host):
     plain = """\
 Hola, te creamos un usuario para que puedas enviar tus soluciones. Solo
 debes entrar a:
-omaforos.com.ar/oia
+HOST
 
 Tu credenciales son:
 Usuario: USERNAME
@@ -99,11 +99,11 @@ No olvidar los recursos online (apuntes, links, etc):
 bit.ly/oiapoli
 
 Saludos!
-""".replace('USERNAME', user.username).replace('PASSWORD', user.password)
+""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host)
     html = """\
 <div dir=3D"ltr">Hola, te creamos un usuario para que puedas enviar tus sol=
 uciones. Solo debes entrar a:<div style=3D"text-align:center"><font size=3D=
-"6"><a href=3D"http://omaforos.com.ar/oia" target=3D"_blank">omaforos.com.a=
+"6"><a href=3D"http://HOST" target=3D"_blank">omaforos.com.a=
 r/oia</a></font></div><div style=3D"text-align:center"><br></div><div>Tu cr=
 edenciales son:</div><div>Usuario: USERNAME</div><div>Contrase=C3=B1a:=C2=A0=
 PASSWORD</div><div><br></div><div>Cualquier error/problema que te =
@@ -111,11 +111,11 @@ surja no dudes en mandarnos un mail.<br></div><div><br></div><div>No olvida=
 r los recursos online (apuntes, links, etc):</div><div style=3D"text-align:=
 center"><a href=3D"http://bit.ly/oiapoli" target=3D"_blank"><font size=3D"6=
 ">bit.ly/oiapoli</font></a></div><div><br></div><div>Saludos!</div><div><br=
-></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password)
+></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host)
     send_email(user.email, "Juez Online OIA - Credenciales de acceso", plain, html)
     
-def send_confirmation_code(user):
-    link = "http://localhost:8888/register?user=3D" + user['username'] + '&code=3D' + user['activation_code']
+def send_confirmation_code(user, host):
+    link = "http://"+host+"/register?user=3D" + user['username'] + '&code=3D' + user['activation_code']
     plain = """\
 Para poder obtener tu usuario, por favor haz click en la siguiente
 direcci=C3=B3n:
@@ -167,7 +167,7 @@ class RegisterHandler(BaseHandler):
                     fail_redirect("Error al activar usuario.")
                     return
                 else:
-                    send_credentials(user)
+                    send_credentials(user, self.request.host)
                     self.redirect("/?msg="+escape.url_escape("La cuenta ha sido activada exitosamente. Se envió un mail conteniendo tus credenciales."))
         else:
             self.render("register.html", **self.r_params)
@@ -178,13 +178,13 @@ class RegisterHandler(BaseHandler):
         fail_redirect = lambda msg : self.redirect("/register?register_error="+escape.url_escape(msg))
 
         attrs = dict()
-        attrs['username'] = self.get_argument("username", "").strip()
         attrs['password'] = self.get_argument("password", "")
         attrs['first_name'] = self.get_argument("first_name", "").strip()
         attrs['last_name'] = self.get_argument("last_name", "").strip()
         attrs['email'] = self.get_argument("email", "").strip()
         attrs['city'] = self.get_argument("city", "").strip()
         attrs['school'] = self.get_argument("school", "").strip()
+        attrs['username'] = self.get_argument("email", "").strip()
         
         if len(attrs['username'])<3:
             fail_redirect('El usuario tiene que tener al menos 3 caracteres.')
@@ -253,7 +253,7 @@ class RegisterHandler(BaseHandler):
             user = User(**attrs)
             self.sql_session.add(user)
             self.sql_session.commit()
-            send_confirmation_code(attrs)
+            send_confirmation_code(attrs, self.request.host)
         except Exception as error:
             fail_redirect("Error creando usuario.")
         else:

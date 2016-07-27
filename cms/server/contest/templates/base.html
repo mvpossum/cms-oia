@@ -105,7 +105,11 @@ $(document).ready(function () {
                     <input type="hidden" name="next" value="{{ handler.get_argument("next", "/") }}">
                     <fieldset>
                         <div class="control-group">
+{% if contest.online_registration %}
+                            <label class="control-label" for="input01">{{ _("Username") }} o Email</label>
+{% else %} 
                             <label class="control-label" for="input01">{{ _("Username") }}</label>
+{% end %}
                             <div class="controls">
                                 <input type="text" class="input-xlarge" name="username">
                             </div>
