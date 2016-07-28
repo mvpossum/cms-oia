@@ -11,6 +11,6 @@ cms.egg-info
 cache/
 lib/
 log/
+config/nginx.conf
 util_scripts/conf/*
-cms/server/contest/handlers/secret_code.py
 ejemplo/.itime_contest
