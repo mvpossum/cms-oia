@@ -30,11 +30,10 @@ Changes done
 
 - Added spanish translations.
 - Registration capabilities (explained below).
-- Users & problems name special codification (explained below)
-- Scoreboard separated by levels.
-- cmsImportContest (italian format) modified to load users from csv file.
-- The score shown in the scoreboard is the max between all the submissions.
-- Option to separate the problems in categories (visible for users only)
+- Users & problems separated by levels (explained below).
+- Users in scoreboard are also separated by levels.
+- cmsImportContest (italian format) modified to load users from csv file (see folder ejemplo for an example contest, load it with cmsImportContest ejemplo/ ).
+- Option to separate the problems in categories (explained below)
 - Other minor changes like disabling Testing, hiding some texts, etc.
 
 Online registration
@@ -45,35 +44,33 @@ Once you get there you can activate and configure it:
 - You need to provide your google recaptcha codes (https://www.google.com/recaptcha/)
 - You need to provide the credentials for the gmail account used to send confirmation links. Don't use an account with critical information since the method is not secure. To be able to use the account you need to enable the access for less secure apps (https://www.google.com/settings/security/lesssecureapps)
 
-Usernames
+Categories
 ------------
-They have to be in the form:
+Every task can have a category. From the cmsAdminWebServer contest settings is possible to enable or disable categories.
+When categories is enabled, the list of the problem shown to the contestants form a tree structure.
+You can set the category of a tree under task properties on the cmsAdminWebServer. It's also loaded from the yaml file, setting the property 'category'.
 
-[level]whatever
+Separate subcategories with dots. For example, if a task should be in the category Day 1, which is inside the category IOI 2013, then the category should be:
+IOI 2013.Day 1
 
-For example:
-
-2pocharles
-
-It's a username level 2.
-Note: level can be 1, 2, 3, or x. x's users will see the problems for all levels.
-If you don't use any of these letter, this user won't have a level. It won't appear on ranking.
-
-
-Problem names
+Levels
 ------------
-They have to be in the form:
+Every user and task can have a level. From the cmsAdminWebServer contest settings is possible to restrict the visibility of tasks so that users can only see problems of their levels.
+Level can be 1, 2, 3 or x. Users with level x can see all levels, tasks with level x can be seen by all levels.
 
-N[level]whatever
+User levels
+------------
+You can set the level under user properties on the cmsAdminWebServer. It's also loaded from the csv file during import.
 
-For example:
 
-N3travellingsalesman
+Task levels
+------------
+You can set the level under task properties on the AdminWebServer. It's also loaded from the yaml file, setting the property 'level'.
 
 
 Scoreboard
 ------------
-It is separated by ranking, and shows the school instead of the team. You can modify the school with admin interface (cmsAdminWebServer), under user properties or automatically load it from a csv when importing the contest. 
+It is separated by levels, and shows the school instead of the team. You can modify the school with admin interface (cmsAdminWebServer), under user properties or automatically load it from a csv when importing the contest. 
 
 
 Log
