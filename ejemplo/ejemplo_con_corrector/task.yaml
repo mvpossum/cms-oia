@@ -6,12 +6,12 @@ time_limit: 1
 memory_limit: 256
 #numero de casos:
 n_input: 10
-#enumerar todos los casos:
-public_testcases: 0,1,2,3,4,5,6,7,8,9
+public_testcases: all
 #si se desea leer de teclado/pantallo dejar en blanco
 infile: "input.txt"
 outfile: "output.txt"
 #esto dejarlo asi
 primary_language: es
 token_mode: disabled
-
+score_mode: max
+level: 2

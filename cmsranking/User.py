@@ -44,6 +44,7 @@ class User(Entity):
         Entity.__init__(self)
         self.f_name = None
         self.l_name = None
+        self.level = None
         self.team = None
 
     @staticmethod
@@ -73,6 +74,7 @@ class User(Entity):
         self.f_name = data['f_name']
         self.l_name = data['l_name']
         self.school = data['school']
+        self.level = data['level']
         self.team = data['team']
 
     def get(self):

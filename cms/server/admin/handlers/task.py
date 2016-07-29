@@ -133,6 +133,7 @@ class TaskHandler(BaseHandler):
             self.get_string(attrs, "title")
             self.get_int(attrs, "hide_task_prefix")
             self.get_string(attrs, "category")
+            self.get_string(attrs, "level")
 
             assert attrs.get("name") is not None, "No task name specified."
 

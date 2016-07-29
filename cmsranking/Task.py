@@ -51,6 +51,7 @@ class Task(Entity):
         Entity.__init__(self)
         self.name = None
         self.short_name = None
+        self.level = None
         self.contest = None
         self.max_score = None
         self.extra_headers = None
@@ -97,6 +98,7 @@ class Task(Entity):
         self.validate(data)
         self.name = data['name']
         self.short_name = data['short_name']
+        self.level = data['level']
         self.contest = data['contest']
         self.max_score = data['max_score']
         self.score_precision = data['score_precision']

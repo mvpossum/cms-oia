@@ -175,7 +175,7 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==""+lvl || lvl==0){
+				if(task["level"]==""+lvl || lvl==0){
 				    result += " \
     <col class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"/> <col/><col/>";
 		        }
@@ -211,7 +211,7 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==""+lvl || lvl==0){
+				if(task["level"]==""+lvl || lvl==0){
                     result += " \
         <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"] + "</abbr></th>";
 			    }
@@ -229,7 +229,7 @@ var Scoreboard = new function () {
     self.make_body = function (lvl) {
         for (var u_id in DataStore.users) {
             var user = DataStore.users[u_id];
-            if(user["key"][0] == ""+lvl){
+            if(user["level"] == ""+lvl){
 			    user["row"] = $(self.make_row(user))[0];
 			    self.user_list[lvl].push(user);
 			}
@@ -240,7 +240,7 @@ var Scoreboard = new function () {
 
 
     self.make_row = function (user) {
-        var lvl=user["key"][0];
+        var lvl=user["level"];
         if(lvl=="x")
             lvl=0;
         // See the comment in .make_cols() for the reason we use colspans.
@@ -266,7 +266,7 @@ var Scoreboard = new function () {
             for (var j in tasks) {
                 var task = tasks[j];
                 var t_id = task["key"];
-				if(task["short_name"][1]==""+lvl || lvl==0){
+				if(task["level"]==""+lvl || lvl==0){
                     var score_class = self.get_score_class(user["t_" + t_id], task["max_score"]);
                     result += " \
         <td colspan=\"3\" class=\"score task " + score_class + "\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\">" + round_to_str(user["t_" + t_id], task["score_precision"]) + "</td>";
@@ -324,7 +324,7 @@ var Scoreboard = new function () {
     // Suppose the scoreboard is correctly sorted except for the given user.
     // Move this user (up or down) to put it in his correct position.
     self.move_user = function (user) {
-        var lvl=user["key"][0];
+        var lvl=user["level"];
         if(lvl=="x")
             lvl=0;
         var list = self.user_list[lvl];
@@ -394,13 +394,14 @@ var Scoreboard = new function () {
 
         var lvl=user["key"][0];
         if(lvl=="x")
+            lvl=0;
 
         user["row"] = $row[0];
         user["index"] = self.user_list[lvl].length;
         
         self.user_list[lvl].push(user);
 
-        self.tbody_el[lvl].append(row);
+        self.tbody_el[lvl].append($row);
         // The row will be at the bottom (since it has a score of zero and thus
         // the maximum rank), but we may still need to sort it due to other
         // users having that score and the sort-by-name clause.
@@ -411,7 +412,7 @@ var Scoreboard = new function () {
     // This callback is called by the DataStore when a user is updated.
     // It updates only its basic information (first name, last name and team).
     self.update_user = function (u_id, old_user, user) {
-        var lvl=old_user["key"][0];
+        var lvl=old_user["level"];
         if(lvl=="x")
             lvl=0;
             
@@ -436,7 +437,7 @@ var Scoreboard = new function () {
 
     // This callback is called by the DataStore when a user is deleted.
     self.delete_user = function (u_id, old_user) {
-        var lvl=old_user["key"][0];
+        var lvl=old_user["level"];
         if(lvl=="x")
             lvl=0;
         var $row = $(old_user["row"]);

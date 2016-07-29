@@ -333,7 +333,7 @@ class ProxyService(TriggeredService):
 
             users = dict()
             teams = dict()
-
+            
             for participation in contest.participations:
                 user = participation.user
                 team = participation.team
@@ -341,7 +341,8 @@ class ProxyService(TriggeredService):
                     users[encode_id(user.username)] = {
                         "f_name": user.first_name,
                         "l_name": user.last_name,
-                        "school": user.school if user.school is not None else None,
+                        "level": user.level,
+                        "school": user.school,
                         "team": team.code if team is not None else None,
                     }
                     if team is not None:
@@ -356,6 +357,7 @@ class ProxyService(TriggeredService):
                 tasks[encode_id(task.name)] = {
                     "short_name": task.name,
                     "name": task.title,
+                    "level": task.level,
                     "contest": encode_id(contest.name),
                     "order": task.num,
                     "max_score": score_type.max_score,

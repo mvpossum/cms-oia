@@ -105,6 +105,13 @@
       </tr>
       <tr>
         <td>
+          <span class="info" title="Contestant level."></span>
+          Level
+        </td>
+        <td><input type="text" name="level" value="{{ user.level if user.level is not None else "" }}"/></td>
+      </tr>
+      <tr>
+        <td>
           <span class="info" title="Timezone of the contestant, used to display start, end times and the current server time in local time.
                                     Example: 'Europe/Rome', 'America/New_York', ..."></span>
           Timezone
@@ -128,24 +135,10 @@
       </tr>
       <tr>
         <td>
-          <span class="info" title="Province of the contestant."></span>
-          Province
-        </td>
-        <td><input type="text" name="province" value="{{ user.province if user.province is not None else "" }}"></td>
-      </tr>
-      <tr>
-        <td>
           <span class="info" title="City of the contestant."></span>
           City
         </td>
         <td><input type="text" name="city" value="{{ user.city if user.city is not None else "" }}"></td>
-      </tr>
-      <tr>
-        <td>
-          <span class="info" title="Birthdate of the contestant."></span>
-          Birthdate
-        </td>
-        <td><input type="text" name="birthdate" value="{{ user.birthdate if user.birthdate is not None else "" }}"></td>
       </tr>
     </table>
     <input type="submit" value="Update" />

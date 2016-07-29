@@ -215,11 +215,11 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         participations = load(conf, None, ["users", "utenti"])
 
         if os.path.exists(os.path.join(self.path, "users.csv")):
-            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password'}
+            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level'}
             with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
                 reader = csv.DictReader(infile)
                 for row in reader:
-                    participations.append({translation[key]:unicode(row[key], "utf-8") for key in ('Nombre','Apellido', 'Username', 'Password')})
+                    participations.append({translation[key]:unicode(row[key], "utf-8") for key in translation})
                         
         # Import was successful
         os.remove(os.path.join(self.path, ".import_error_contest"))
@@ -354,7 +354,10 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         load(conf, args, ["title", "nome"])
         load(conf, args, "hide_task_prefix")
         load(conf, args, "category")
-
+        load(conf, args, "level")
+        if args["level"]:
+            args["level"] = unicode(args["level"])
+            
         if name != args["name"]:
             logger.info("The task name (%s) and the directory name (%s) are "
                         "different. The former will be used.", args["name"],

@@ -42,7 +42,6 @@ from cmscommon.mimetypes import get_type_for_file_name
 
 from .base import BaseHandler, FileHandler
 
-
 class TaskDescriptionHandler(BaseHandler):
     """Shows the data of a task in the contest.
 
@@ -54,7 +53,10 @@ class TaskDescriptionHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
-
+        logging.warning("user level %s, task level %s" % (self.current_user.user.level, task.level))
+        if self.contest.restrict_level and self.current_user.user.level != task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
+         
         for statement in task.statements.itervalues():
             lang_code = statement.language
             if is_language_country_code(lang_code):
@@ -83,6 +85,8 @@ class TaskStatementViewHandler(FileHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
 
         if lang_code not in task.statements:
             raise tornado.web.HTTPError(404)
@@ -108,6 +112,8 @@ class TaskAttachmentViewHandler(FileHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         if filename not in task.attachments:

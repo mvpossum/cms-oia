@@ -328,27 +328,30 @@ class BaseHandler(CommonRequestHandler):
         ret["cookie_lang"] = self.cookie_lang
         ret["browser_lang"] = self.browser_lang
         
-        tree_menu = {'childs':{}, 'tasks': []}
-        for t in self.contest.tasks:
-            if t.category:
-                node = tree_menu
-                for subcat in t.category.split('.'):
-                    if subcat not in node['childs']:
-                        node['childs'][subcat] = {'childs':{}, 'tasks': []}
-                    node = node['childs'][subcat]
-                node['tasks'].append(t)
-        
-        def make_list(tree, result, ancname="root"):
-            for name in sorted(tree['childs']):
-                fullname = ancname+'.'+name
-                result.append({'type': 'startcat', 'name' : name, 'fullname' : fullname, 'parent' : ancname})
-                make_list(tree['childs'][name], result, fullname)
-                result.append({'type': 'endcat'})
-            for t in sorted(tree['tasks'], key=lambda t: t.name):
-                result.append({'type': 'task', 'task' : t, 'parent' : ancname})
-        
-        ret['list_tree_menu'] = []
-        make_list(tree_menu, ret['list_tree_menu'])
+        if self.current_user is not None:
+            tree_menu = {'childs':{}, 'tasks': []}
+            for t in self.contest.tasks:
+                if not self.contest.restrict_level or self.current_user.user.level ==  t.level or self.current_user.user.level == "x" or t.level == "x":
+                    node = tree_menu
+                    if t.category:
+                        for subcat in t.category.split('.'):
+                            if subcat not in node['childs']:
+                                node['childs'][subcat] = {'childs':{}, 'tasks': []}
+                            node = node['childs'][subcat]
+                    node['tasks'].append(t)
+            
+            def make_list(tree, result, ancname="root"):
+                for name in sorted(tree['childs']):
+                    fullname = ancname+'.'+name
+                    result.append({'type': 'startcat', 'name' : name, 'fullname' : fullname, 'parent' : ancname})
+                    make_list(tree['childs'][name], result, fullname)
+                    result.append({'type': 'endcat'})
+                for t in sorted(tree['tasks'], key=lambda t: t.name):
+                    result.append({'type': 'task', 'task' : t, 'parent' : ancname})
+                
+            
+            ret['list_tree_menu'] = []
+            make_list(tree_menu, ret['list_tree_menu'])
         
         return ret
 

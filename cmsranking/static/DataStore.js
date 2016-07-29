@@ -614,12 +614,12 @@ var DataStore = new function () {
         // Task
         new_t_score = round(new_t_score, task["score_precision"]);
         var old_t_score = user["t_" + t_id];
-        user["t_" + t_id] = Math.max(old_t_score, new_t_score);
+        user["t_" + t_id] = new_t_score;
 
         // Contest
         var new_c_score = 0.0;  // = max(user's score on t for t in contest.tasks)
         for (var i = 0; i < contest.tasks.length; i += 1) {
-			if(user["key"][0]==contest.tasks[i].key[1] || user["key"][0]=="x")
+			if(user["level"]==contest.tasks[i].level || user["level"]=="x" || contest.tasks[i].level == "x")
                 new_c_score += user["t_" + contest.tasks[i].key];
         }
         new_c_score = round(new_c_score, contest["score_precision"]);
@@ -676,7 +676,7 @@ var DataStore = new function () {
         for (var i in list) {
             user = list[i];
             score = user["global"];
-			lvl=user["key"][0];
+			lvl=user["level"];
 			if(lvl=="x")
 			    lvl=0;
             if (score === prev_score[lvl]) {
@@ -747,7 +747,7 @@ var DataStore = new function () {
         // We don't know old_score but we'll see that it's not needed.
         var new_score = user["global"];
         var old_rank = user["rank"];
-        var lvl=user["key"][0];
+        var lvl=user["level"];
 		if(lvl=="x")
 			lvl=0;
         // The new rank is computed by strictly applying the definition:
@@ -756,7 +756,7 @@ var DataStore = new function () {
 
         for (var u2_id in self.users) {
             var user2 = self.users[u2_id];
-            var lvl2=user2["key"][0];
+            var lvl2=user2["level"];
 			if(lvl2=="x")
 			    lvl2=0;
             // this condition is equivalent to

@@ -216,6 +216,10 @@ class Task(Base):
     category = Column(
         Unicode,
         nullable=True)
+        
+    level = Column(
+        Unicode,
+        nullable=True)
 
     hide_task_prefix = Column(
         Integer,

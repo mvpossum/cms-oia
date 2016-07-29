@@ -104,16 +104,12 @@ class User(Base):
         Unicode,
         nullable=True)
         
-    province = Column(
-        Unicode,
-        nullable=True)
-        
     city = Column(
         Unicode,
         nullable=True)
         
-    birthdate = Column(
-        DateTime,
+    level = Column(
+        Unicode,
         nullable=True)
     
     activation_code = Column(

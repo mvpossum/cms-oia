@@ -87,16 +87,17 @@ class UserTestInterfaceHandler(BaseHandler):
                 self.contest.max_user_test_number - user_test_c
 
         for task in self.contest.tasks:
-            if self.request.query == task.name:
-                default_task = task
-            user_tests[task.id] = self.sql_session.query(UserTest)\
-                .filter(UserTest.participation == participation)\
-                .filter(UserTest.task == task)\
-                .all()
-            user_tests_left_task = None
-            if task.max_user_test_number is not None:
-                user_tests_left_task = \
-                    task.max_user_test_number - len(user_tests[task.id])
+            if not (self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" or task.level != "x"):
+                if self.request.query == task.name:
+                    default_task = task
+                user_tests[task.id] = self.sql_session.query(UserTest)\
+                    .filter(UserTest.participation == participation)\
+                    .filter(UserTest.task == task)\
+                    .all()
+                user_tests_left_task = None
+                if task.max_user_test_number is not None:
+                    user_tests_left_task = \
+                        task.max_user_test_number - len(user_tests[task.id])
 
             user_tests_left[task.id] = user_tests_left_contest
             if user_tests_left_task is not None and \
@@ -136,6 +137,8 @@ class UserTestHandler(BaseHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         # Check that the task is testable
@@ -462,6 +465,8 @@ class UserTestStatusHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
 
         user_test = self.sql_session.query(UserTest)\
             .filter(UserTest.participation == participation)\
@@ -520,6 +525,8 @@ class UserTestDetailsHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
 
         user_test = self.sql_session.query(UserTest)\
             .filter(UserTest.participation == participation)\
@@ -550,6 +557,8 @@ class UserTestIOHandler(FileHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         user_test = self.sql_session.query(UserTest)\
@@ -591,6 +600,8 @@ class UserTestFileHandler(FileHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         user_test = self.sql_session.query(UserTest)\

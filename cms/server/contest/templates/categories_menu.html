@@ -2,16 +2,22 @@
 <div id="C2root">
 <div class="accordion-group" style="border:0;padding:0;margin:0">
 {% if request.path.startswith('/tasks/') %}
-    {% set actcat='root.'+filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks)[0].category %}
+    {% set posi = filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks) %}
+    {% if posi %}
+        {% set actcat='root.'+filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks)[0].category %}
+    {% else %}
+        {% set actcat=None %}
+    {% end %}
+{% else %}
+    {% set actcat=None %}
 {% end %}
-{% set mkid = lambda s : s.replace(' ', '--').replace('.', '-') %}
+{% set mkid = lambda s : s.replace('-', '-0').replace(' ', '-1').replace('.', '-2') %}
 {% for ev in list_tree_menu %}
     {% if ev['type'] == 'task' %}
         {% set t_iter = ev['task'] %}
-        {% if not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x" %}
+        {% if not contest.restrict_level or current_user.user.level == t_iter.level or current_user.user.level == "x" or t_iter.level == "x" %}
                 <div class="menu_label nav-header" style="cursor:pointer;{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %}color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;{% end %}" data-toggle="collapse" data-target="[id=P{{ mkid(t_iter.name) }}]" data-parent="[id=C2{{ mkid(ev['parent']) }}]">{{ t_iter.name[t_iter.hide_task_prefix:] }}</div>
                 <ol class="nav nav-list collapse{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} in{% end %}" id="P{{ mkid(t_iter.name) }}">
-
                     <li>
                         <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
                     </li>
@@ -24,7 +30,7 @@
         {% set cate = ev['fullname'] %}
         <div id="C2{{ mkid(cate) }}">
         <div class="menu_label nav-header" style="color: #0088cc;"><a style="cursor:pointer;" data-toggle="collapse" data-target="[id=C{{ mkid(cate) }}]" data-parent="[id=C2{{ mkid(ev['parent']) }}]">{{ ev['name'] }}</a></div>
-        <div class="nav nav-list collapse{% if actcat == cate or actcat.startswith(cate+'.') %} in{% end %} accordion-group" id="C{{ mkid(cate) }}" style="border:0">
+        <div class="nav nav-list collapse{% if actcat and (actcat == cate or actcat.startswith(cate+'.')) %} in{% end %} accordion-group" id="C{{ mkid(cate) }}" style="border:0">
     {% else %}
         </div>
         </div>

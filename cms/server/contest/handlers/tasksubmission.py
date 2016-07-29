@@ -74,6 +74,8 @@ class SubmitHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
 
         # Alias for easy access
         contest = self.contest
@@ -382,6 +384,8 @@ class TaskSubmissionsHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
 
         submissions = self.sql_session.query(Submission)\
             .filter(Submission.participation == participation)\
@@ -435,6 +439,8 @@ class SubmissionStatusHandler(BaseHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         submission = self.sql_session.query(Submission)\
@@ -499,6 +505,8 @@ class SubmissionDetailsHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
+            raise tornado.web.HTTPError(404)
 
         submission = self.sql_session.query(Submission)\
             .filter(Submission.participation == participation)\
@@ -544,6 +552,8 @@ class SubmissionFileHandler(FileHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         submission = self.sql_session.query(Submission)\
@@ -597,6 +607,8 @@ class UseTokenHandler(BaseHandler):
         try:
             task = self.contest.get_task(task_name)
         except KeyError:
+            raise tornado.web.HTTPError(404)
+        if self.contest.restrict_level and self.current_user.user.level !=  task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
 
         submission = self.sql_session.query(Submission)\
