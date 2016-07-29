@@ -353,9 +353,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         load(conf, args, ["name", "nome_breve"])
         load(conf, args, ["title", "nome"])
         load(conf, args, "hide_task_prefix")
-        
-        if "category" in args:
-            load(conf, args, ["category"])
+        load(conf, args, "category")
 
         if name != args["name"]:
             logger.info("The task name (%s) and the directory name (%s) are "
