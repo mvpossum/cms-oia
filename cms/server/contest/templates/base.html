@@ -69,7 +69,7 @@ $(document).ready(function () {
 {% end %}
 {% if current_user is not None %}
                     <p class="navbar-text pull-right">
-    {% if current_user.user.username[0]=='1' or current_user.user.username[0]=='2' or current_user.user.username[0]=='3' or current_user.user.username[0]=='x' %}
+    {% if contest.restrict_level and (current_user.user.username[0]=='1' or current_user.user.username[0]=='2' or current_user.user.username[0]=='3' or current_user.user.username[0]=='x') %}
                         {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>, level <strong>%(lvl)s</strong>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username, "lvl": current_user.user.username[0]} %}
     {% else %}
                         {% raw _("Logged in as <strong>%(first_name)s %(last_name)s</strong> <em>(%(username)s)</em>") % {"first_name": current_user.user.first_name, "last_name": current_user.user.last_name, "username": current_user.user.username} %}
