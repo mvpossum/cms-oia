@@ -215,7 +215,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         participations = load(conf, None, ["users", "utenti"])
 
         if os.path.exists(os.path.join(self.path, "users.csv")):
-            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level'}
+            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
             with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
                 reader = csv.DictReader(infile)
                 for row in reader:
@@ -249,11 +249,11 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         if os.path.exists(os.path.join(os.path.dirname(self.path),
                                            "users.csv")):
-            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password'}
+            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
             with open(os.path.join(os.path.dirname(self.path), "users.csv"), mode='rb') as infile:
                 reader = csv.DictReader(infile)
                 for row in reader:
-                    conf.append({translation[key]:unicode(row[key], "utf-8") for key in ('Nombre','Apellido', 'Username', 'Password')})
+                    conf.append({translation[key]:unicode(row[key], "utf-8") for key in translation})
        
         for user in conf:
             if user["username"] == username:
