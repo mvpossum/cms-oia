@@ -167,9 +167,9 @@
     <tbody>
 {% set extensions = "[%s]" %  ("|".join(LANGUAGE_TO_SOURCE_EXT_MAP[lang][1:] for lang in contest.languages)) %}
 {% for t_iter in contest.tasks %}
-    {% if not contest.restrict_level or current_user.user.username[0] ==  t_iter.name[1] or current_user.user.username[0] == "x" or t_iter.name[1] == "x" %}
+    {% if not contest.restrict_level or current_user.user.level ==  t_iter.level or current_user.user.level == "x" or t_iter.level == "x" %}
         <tr>
-            <th>{{ t_iter.name }}</th>
+            <th>{{ t_iter.name[t_iter.hide_task_prefix:] }}</th>
             <td>{{ t_iter.title }}</td>
             <td>
         {% if t_iter.active_dataset.time_limit is not None %}

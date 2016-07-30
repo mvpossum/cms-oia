@@ -1,13 +1,9 @@
 <hr>
 <div id="C2root">
 <div class="accordion-group" style="border:0;padding:0;margin:0">
-{% if request.path.startswith('/tasks/') %}
-    {% set posi = filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks) %}
-    {% if posi %}
-        {% set actcat='root.'+filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks)[0].category %}
-    {% else %}
-        {% set actcat=None %}
-    {% end %}
+{% set posi = filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks) %}
+{% if posi %}
+    {% set actcat='root.'+filter(lambda t: request.path.startswith('/tasks/%s/' % encode_for_url(t.name)), contest.tasks)[0].category %}
 {% else %}
     {% set actcat=None %}
 {% end %}
