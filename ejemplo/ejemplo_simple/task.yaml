@@ -1,5 +1,6 @@
 name: "ejemplo_simple"
 title: "Simple Test"
+category: "Categoria 1.Subcategoria 3"
 #float, en segundos:
 time_limit: 1
 #int, en megas:

@@ -213,8 +213,9 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         tasks = load(conf, None, ["tasks", "problemi"])
         participations = load(conf, None, ["users", "utenti"])
-
         if os.path.exists(os.path.join(self.path, "users.csv")):
+            if not participations:
+                participations = []
             translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
             with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
                 reader = csv.DictReader(infile)
@@ -249,6 +250,8 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         if os.path.exists(os.path.join(os.path.dirname(self.path),
                                            "users.csv")):
+            if not conf:
+                conf = []
             translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
             with open(os.path.join(os.path.dirname(self.path), "users.csv"), mode='rb') as infile:
                 reader = csv.DictReader(infile)
@@ -355,7 +358,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         load(conf, args, "hide_task_prefix")
         load(conf, args, "category")
         load(conf, args, "level")
-        if args["level"]:
+        if "level" in args:
             args["level"] = unicode(args["level"])
             
         if name != args["name"]:

@@ -53,7 +53,6 @@ class TaskDescriptionHandler(BaseHandler):
             task = self.contest.get_task(task_name)
         except KeyError:
             raise tornado.web.HTTPError(404)
-        logging.warning("user level %s, task level %s" % (self.current_user.user.level, task.level))
         if self.contest.restrict_level and self.current_user.user.level != task.level and self.current_user.user.level != "x" and task.level != "x":
             raise tornado.web.HTTPError(404)
          

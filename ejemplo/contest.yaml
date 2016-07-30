@@ -3,9 +3,6 @@ description: "Ejemplo"
 tasks:
   - "ejemplo_simple"
   - "ejemplo_con_corrector"
-users:
-  - username: "1po100"
-    password: "1234"
 #dejar esto por las dudas
 primary_language: es
 token_mode: disabled

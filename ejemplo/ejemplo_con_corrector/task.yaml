@@ -1,5 +1,6 @@
 name: "ejemplo_con_corrector"
 title: "Con corrector test"
+category: "Categoria 2"
 #float, en segundos:
 time_limit: 1
 #int, en megas:
