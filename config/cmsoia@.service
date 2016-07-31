@@ -1,0 +1,21 @@
+# The OIA server service unit file
+#
+# Quick HowTo:
+# 1. Copy this file to /etc/systemd/system/cmsoia@.service
+# 2. Edit User=
+#   ("User=foo")
+# 3. Run `systemctl daemon-reload`
+# 4. Run `systemctl enable cmsoia@:<contest>.service`
+
+[Unit]
+Description=OIA Online Judge with contest %I
+After=syslog.target network.target postgresql.service
+
+[Service]
+Type=simple
+User=mvillagra
+
+ExecStart=/usr/bin/cmsResourceService -a %I
+
+[Install]
+WantedBy=multi-user.target
