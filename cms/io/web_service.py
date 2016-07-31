@@ -57,7 +57,7 @@ class WebService(Service):
         auth_middleware = parameters.pop('auth_middleware', None)
         is_proxy_used = parameters.pop('is_proxy_used', False)
 
-        self.wsgi_app = tornado.wsgi.WSGIApplication(handlers, **parameters)
+        self.wsgi_app = tornado.wsgi.WSGIApplication(handlers, template_whitespace="oneline", **parameters)
         self.wsgi_app.service = self
 
         for entry in static_files:
