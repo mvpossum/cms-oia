@@ -10,23 +10,24 @@
 {% set mkid = lambda s : s.replace('-', '-0').replace(' ', '-1').replace('.', '-2') %}
 {% for ev in list_tree_menu %}
     {% if ev['type'] == 'task' %}
-        {% set t_iter = ev['task'] %}
-        {% if not contest.restrict_level or current_user.user.level == t_iter.level or current_user.user.level == "x" or t_iter.level == "x" %}
-                <div class="menu_label nav-header" style="cursor:pointer;{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %}color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;{% end %}" data-toggle="collapse" data-target="[id=P{{ mkid(t_iter.name) }}]" data-parent="[id=C2{{ mkid(ev['parent']) }}]">{{ t_iter.name[t_iter.hide_task_prefix:] }}</div>
-                <ol class="nav nav-list collapse{% if request.path.startswith('/tasks/%s/' % encode_for_url(t_iter.name)) %} in{% end %}" id="P{{ mkid(t_iter.name) }}">
+        {% set id = mkid(ev['task'].name) %}
+        {% if not contest.restrict_level or current_user.user.level == ev['task'].level or current_user.user.level == "x" or ev['task'].level == "x" %}
+                <div class="menu_label nav-header" style="cursor:pointer;{% if request.path.startswith('/tasks/%s/' % encode_for_url(ev['task'].name)) %}color:#ffffff;text-shadow:0 -1px 0 rgba(0, 0, 0, 0.2);background-color:#0088cc;{% end %}" data-toggle="collapse" data-target="[id=P{{ id }}]" data-parent="[id=C2{{ mkid(ev['parent']) }}]">{{ ev['task'].name[ev['task'].hide_task_prefix:] }}</div>
+                <ol class="nav nav-list collapse{% if request.path.startswith('/tasks/%s/' % encode_for_url(ev['task'].name)) %} in{% end %}" id="P{{ id }}">
                     <li>
-                        <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/description">{{ _("Statement") }}</a>
+                        <a href="{{ url_root }}/tasks/{{ encode_for_url(ev['task'].name) }}/description">{{ _("Statement") }}</a>
                     </li>
                     <li>
-                        <a href="{{ url_root }}/tasks/{{ encode_for_url(t_iter.name) }}/submissions">{{ _("Submissions") }}</a>
+                        <a href="{{ url_root }}/tasks/{{ encode_for_url(ev['task'].name) }}/submissions">{{ _("Submissions") }}</a>
                     </li>
                 </ol>
         {% end %}
     {% elif ev['type'] == 'startcat' %}
         {% set cate = ev['fullname'] %}
-        <div id="C2{{ mkid(cate) }}">
-        <div class="menu_label nav-header" style="color: #0088cc;"><a style="cursor:pointer;" data-toggle="collapse" data-target="[id=C{{ mkid(cate) }}]" data-parent="[id=C2{{ mkid(ev['parent']) }}]">{{ ev['name'] }}</a></div>
-        <div class="nav nav-list collapse{% if actcat and (actcat == cate or actcat.startswith(cate+'.')) %} in{% end %} accordion-group" id="C{{ mkid(cate) }}" style="border:0">
+        {% set id = mkid(cate) %}
+        <div id="C2{{ id }}">
+        <div class="menu_label nav-header" style="color: #0088cc;"><a style="cursor:pointer;" data-toggle="collapse" data-target="[id=C{{ id }}]" data-parent="[id=C2{{ mkid(ev['parent']) }}]">{{ ev['name'] }}</a></div>
+        <div class="nav nav-list collapse{% if actcat and (actcat == cate or actcat.startswith(cate+'.')) %} in{% end %} accordion-group" id="C{{ id }}" style="border:0">
     {% else %}
         </div>
         </div>
