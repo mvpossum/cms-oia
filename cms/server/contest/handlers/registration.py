@@ -81,8 +81,11 @@ def send_email(gmailuser, password, recipient, subject, body, htmlbody=None):
     server.login(gmailuser, password)
     server.sendmail(gmailuser, to, msg.as_string())
     server.close()
-    
+
+SERVER_PORT = 8888
 def send_credentials(gmailuser, password, user, host):
+    if SERVER_PORT!=80:
+        host+=":"+str(SERVER_PORT)
     plain = """\
 Hola, te creamos un usuario para que puedas enviar tus soluciones. Solo
 debes entrar a:
@@ -110,10 +113,12 @@ surja no dudes en mandarnos un mail.<br></div><div><br></div><div>No olvida=
 r los recursos online (apuntes, links, etc):</div><div style=3D"text-align:=
 center"><a href=3D"http://bit.ly/oiapoli" target=3D"_blank"><font size=3D"6=
 ">bit.ly/oiapoli</font></a></div><div><br></div><div>Saludos!</div><div><br=
-></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host)
+></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host+':8888')
     send_email(gmailuser, password, user.email, "Juez Online OIA - Credenciales de acceso", plain, html)
     
 def send_confirmation_code(gmailuser, password, user, host):
+    if SERVER_PORT!=80:
+        host+=":"+str(SERVER_PORT)
     link = "http://"+host+"/register?user=3D" + user['username'] + '&code=3D' + user['activation_code']
     plain = """\
 Para poder obtener tu usuario, por favor haz click en la siguiente
