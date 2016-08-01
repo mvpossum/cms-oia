@@ -113,7 +113,7 @@ surja no dudes en mandarnos un mail.<br></div><div><br></div><div>No olvida=
 r los recursos online (apuntes, links, etc):</div><div style=3D"text-align:=
 center"><a href=3D"http://bit.ly/oiapoli" target=3D"_blank"><font size=3D"6=
 ">bit.ly/oiapoli</font></a></div><div><br></div><div>Saludos!</div><div><br=
-></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host+':8888')
+></div></div>""".replace('USERNAME', user.username).replace('PASSWORD', user.password).replace('HOST', host)
     send_email(gmailuser, password, user.email, "Juez Online OIA - Credenciales de acceso", plain, html)
     
 def send_confirmation_code(gmailuser, password, user, host):
