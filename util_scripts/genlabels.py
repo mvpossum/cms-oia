@@ -17,7 +17,7 @@ with open(argv[2], "w") as out:
     out.write(head)
     reader=csv.DictReader(open(argv[1], "r"))
     for row in reader:
-        out.write("\\user{{{0} {1}}}{{{2}}}{{{3}}}{{{4}}}\n\n".format(row['Nombre'],row['Apellido'], row['Username'][0], row['Username'], row['Password']))
+        out.write("\\user{{{0} {1}}}{{{2}}}{{{3}}}{{{4}}}\n\n".format(row['Nombre'], row['Apellido'], row['Nivel'], row['Username'], row['Password']))
     out.write(tail)
 
 call(["pdflatex", argv[2]])
