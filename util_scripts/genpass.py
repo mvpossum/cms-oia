@@ -18,10 +18,10 @@ if len(argv)!=3 and len(argv)!=4:
     exit(1)
         
 with open(argv[2], "w") as out:
-    fieldnames = ['Nombre', 'Apellido', 'Nivel', 'Username', 'Password']
+    fieldnames = ['Nombre', 'Apellido', 'Escuela', 'Nivel', 'Username', 'Password']
     writer = csv.DictWriter(out, fieldnames=fieldnames)
     writer.writeheader()
     reader=csv.DictReader(open(argv[1], "r"))
     for i,row in enumerate(reader):
-        writer.writerow({'Nombre': row['Nombre'], 'Apellido': row['Apellido'], 'Nivel':row['Nivel'],'Username': "usuario"+str(i+1),'Password':  genpass() })
+        writer.writerow({'Nombre': row['Nombre'], 'Apellido': row['Apellido'], 'Escuela':row['Escuela'], 'Nivel':row['Nivel'],'Username': "usuario"+str(i+1),'Password':  genpass() })
     
