@@ -23,5 +23,5 @@ with open(argv[2], "w") as out:
     writer.writeheader()
     reader=csv.DictReader(open(argv[1], "r"))
     for i,row in enumerate(reader):
-        writer.writerow({'Nombre': row['Nombre'], 'Apellido': row['Apellido'], 'Escuela':row['Escuela'], 'Nivel':row['Nivel'],'Username': "usuario"+str(i+1),'Password':  genpass() })
+        writer.writerow({'Nombre': row['Nombre'].capitalize(), 'Apellido': row['Apellido'].capitalize(), 'Escuela':row['Escuela'].capitalize(), 'Nivel':row['Nivel'],'Username': "usuario"+str(i+1),'Password':  genpass() })
     
