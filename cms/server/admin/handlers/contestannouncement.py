@@ -67,10 +67,10 @@ class TimeLeftAnnouncementHandler(BaseHandler):
     def post(self, contest_id):
         self.contest = self.safe_get_item(Contest, contest_id)
         
-        ann = Announcement(self.contest.stop-timedelta(hours=2), 'Quedan 2 horas', 'La competencia finalizará en dos hora.',
+        ann = Announcement(self.contest.stop-timedelta(hours=2), 'Quedan 2 horas', 'La competencia finalizará en dos horas.',
                            contest=self.contest)
         self.sql_session.add(ann)
-        ann = Announcement(self.contest.stop-timedelta(hours=1), 'Queda 1 hora', 'La competencia finalizará en una horas.',
+        ann = Announcement(self.contest.stop-timedelta(hours=1), 'Queda 1 hora', 'La competencia finalizará en una hora.',
                            contest=self.contest)
         self.sql_session.add(ann)
         ann = Announcement(self.contest.stop-timedelta(minutes=30), 'Quedan 30 minutos', 'La competencia finalizará en treinta minutos.',
