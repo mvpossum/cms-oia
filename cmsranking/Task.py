@@ -50,6 +50,7 @@ class Task(Entity):
         """
         Entity.__init__(self)
         self.name = None
+        self.hide_task_prefix = None
         self.short_name = None
         self.level = None
         self.contest = None
@@ -70,6 +71,8 @@ class Task(Entity):
                 "Not a dictionary"
             assert isinstance(data['name'], six.text_type), \
                 "Field 'name' isn't a string"
+            assert isinstance(data['hide_task_prefix'], six.integer_types), \
+                "Field 'hide_task_prefix' isn't an integer"
             assert isinstance(data['short_name'], six.text_type), \
                 "Field 'short_name' isn't a string"
             assert isinstance(data['contest'], six.text_type), \
@@ -97,6 +100,7 @@ class Task(Entity):
     def set(self, data):
         self.validate(data)
         self.name = data['name']
+        self.hide_task_prefix = data['hide_task_prefix']
         self.short_name = data['short_name']
         self.level = data['level']
         self.contest = data['contest']

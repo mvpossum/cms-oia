@@ -213,7 +213,7 @@ var Scoreboard = new function () {
                 var t_id = task["key"];
 				if(task["level"]==""+lvl || lvl==0){
                     result += " \
-        <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"] + "</abbr></th>";
+        <th colspan=\"3\" class=\"score task\" data-task=\"" + t_id + "\" data-sort_key=\"t_" + t_id + "\"><abbr title=\"" + task["name"] + "\">" + task["short_name"].substring(task["hide_task_prefix"]) + "</abbr></th>";
 			    }
             }
         }
@@ -229,7 +229,10 @@ var Scoreboard = new function () {
     self.make_body = function (lvl) {
         for (var u_id in DataStore.users) {
             var user = DataStore.users[u_id];
-            if(user["level"] == ""+lvl){
+            var lvlu=user["level"];
+            if(lvlu=="x")
+                lvlu=0;
+            if(lvlu == ""+lvl){
 			    user["row"] = $(self.make_row(user))[0];
 			    self.user_list[lvl].push(user);
 			}

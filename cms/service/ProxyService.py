@@ -357,6 +357,7 @@ class ProxyService(TriggeredService):
                 tasks[encode_id(task.name)] = {
                     "short_name": task.name,
                     "name": task.title,
+                    "hide_task_prefix": task.hide_task_prefix,
                     "level": task.level,
                     "contest": encode_id(contest.name),
                     "order": task.num,
