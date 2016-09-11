@@ -56,6 +56,16 @@ yaml.Loader.add_constructor("tag:yaml.org,2002:str", construct_yaml_str)
 yaml.SafeLoader.add_constructor("tag:yaml.org,2002:str", construct_yaml_str)
 
 
+def load_csv(root):
+    users = []
+    if os.path.exists(os.path.join(root, "users.csv")):
+        translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
+        with open(os.path.join(root, "users.csv"), mode='rb') as infile:
+            reader = csv.DictReader(infile)
+            for row in reader:
+                users.append({translation[key]:unicode(row[key], "utf-8") for key in translation})
+    return users
+    
 def load(src, dst, src_name, dst_name=None, conv=lambda i: i):
     """Execute:
       dst[dst_name] = conv(src[src_name])
@@ -213,15 +223,10 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         tasks = load(conf, None, ["tasks", "problemi"])
         participations = load(conf, None, ["users", "utenti"])
-        if os.path.exists(os.path.join(self.path, "users.csv")):
-            if not participations:
-                participations = []
-            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
-            with open(os.path.join(self.path, "users.csv"), mode='rb') as infile:
-                reader = csv.DictReader(infile)
-                for row in reader:
-                    participations.append({translation[key]:unicode(row[key], "utf-8") for key in translation})
-                        
+        if not participations:
+            participations = []
+        participations += load_csv(self.path)
+        
         # Import was successful
         os.remove(os.path.join(self.path, ".import_error_contest"))
 
@@ -247,17 +252,10 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         args = {}
 
         conf = load(conf, None, ["users", "utenti"])
+        if not conf:
+            conf = []
+        conf += load_csv(os.path.dirname(self.path))
 
-        if os.path.exists(os.path.join(os.path.dirname(self.path),
-                                           "users.csv")):
-            if not conf:
-                conf = []
-            translation={'Nombre':u'first_name', 'Apellido':u'last_name', 'Username':u'username', 'Password':u'password', 'Nivel':u'level', 'Escuela':u'school'}
-            with open(os.path.join(os.path.dirname(self.path), "users.csv"), mode='rb') as infile:
-                reader = csv.DictReader(infile)
-                for row in reader:
-                    conf.append({translation[key]:unicode(row[key], "utf-8") for key in translation})
-       
         for user in conf:
             if user["username"] == username:
                 conf = user
