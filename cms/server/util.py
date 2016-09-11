@@ -332,7 +332,7 @@ def get_score_class(score, max_score):
     """
     if score <= 0:
         return "score_0"
-    elif score >= max_score:
+    elif score >= max_score - 1e-6:
         return "score_100"
     else:
         return "score_0_100"
