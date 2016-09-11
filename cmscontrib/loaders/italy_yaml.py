@@ -266,6 +266,8 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         load(conf, args, "username")
         load(conf, args, "password")
+        load(conf, args, "level")
+        load(conf, args, "school")
 
         load(conf, args, ["first_name", "nome"])
         load(conf, args, ["last_name", "cognome"])
@@ -276,7 +278,6 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             args["last_name"] = args["username"]
 
         logger.info("User parameters loaded.")
-
         return User(**args)
 
     def get_team(self):
