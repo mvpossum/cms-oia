@@ -87,7 +87,8 @@ class Config(object):
         self.submit_local_copy_path = "%s/submissions/"
         self.tests_local_copy = True
         self.tests_local_copy_path = "%s/tests/"
-        self.is_proxy_used = False
+        self.is_proxy_used = None  # (deprecated in favor of num_proxies_used)
+        self.num_proxies_used = None
         self.max_submission_length = 100000
         self.max_input_length = 5000000
         self.stl_path = "/usr/share/doc/stl-manual/html/"
@@ -122,10 +123,16 @@ class Config(object):
         self.pdf_printing_allowed = False
 
         # Installed or from source?
-        self.installed = sys.argv[0].startswith("/usr/") and \
-            sys.argv[0] != '/usr/bin/ipython' and \
-            sys.argv[0] != '/usr/bin/python2' and \
-            sys.argv[0] != '/usr/bin/python'
+        # We declare we are running from installed if the program was
+        # NOT invoked through some python flavor, and the file is in
+        # the prefix (or real_prefix to accommodate virtualenvs).
+        bin_path = os.path.join(os.getcwd(), sys.argv[0])
+        bin_name = os.path.basename(bin_path)
+        bin_is_python = bin_name in ["ipython", "python", "python2", "python3"]
+        bin_in_installed_path = bin_path.startswith(sys.prefix) or (
+            hasattr(sys, 'real_prefix')
+            and bin_path.startswith(sys.real_prefix))
+        self.installed = bin_in_installed_path and not bin_is_python
 
         if self.installed:
             self.log_dir = os.path.join("/", "var", "local", "log", "cms")
@@ -202,6 +209,10 @@ class Config(object):
             return False
 
         logger.info("Using configuration file %s.", path)
+
+        if "is_proxy_used" in data:
+            logger.warning("The 'is_proxy_used' setting is deprecated, please "
+                           "use 'num_proxies_used' instead.")
 
         # Put core and test services in async_config, ignoring those
         # whose name begins with "_".
