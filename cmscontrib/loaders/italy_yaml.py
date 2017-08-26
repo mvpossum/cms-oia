@@ -141,6 +141,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         # TODO - Not really refined...
         return os.path.exists(os.path.join(path, "contest.yaml")) or \
             os.path.exists(os.path.join(path, "task.yaml")) or \
+            os.path.exists(os.path.join(path, "problema.yaml")) or \
             os.path.exists(os.path.join(os.path.dirname(path), "contest.yaml"))
 
     def get_task_loader(self, taskname):
@@ -319,6 +320,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         name = os.path.split(self.path)[1]
 
         if (not os.path.exists(os.path.join(self.path, "task.yaml"))) and \
+           (not os.path.exists(os.path.join(self.path, "problema.yaml"))) and \
            (not os.path.exists(os.path.join(self.path, "..", name + ".yaml"))):
             logger.critical("File missing: \"task.yaml\"")
             return None
@@ -331,19 +333,24 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                         "rt", encoding="utf-8"))
         except IOError as err:
             try:
-                deprecated_path = os.path.join(self.path, "..", name + ".yaml")
-                conf = yaml.safe_load(io.open(deprecated_path, "rt",
-                                              encoding="utf-8"))
+                conf = yaml.safe_load(
+                    io.open(os.path.join(self.path, "problema.yaml"),
+                            "rt", encoding="utf-8"))
+            except:
+                try:
+                    deprecated_path = os.path.join(self.path, "..", name + ".yaml")
+                    conf = yaml.safe_load(io.open(deprecated_path, "rt",
+                                                  encoding="utf-8"))
 
-                logger.warning("You're using a deprecated location for the "
-                               "task.yaml file. You're advised to move %s to "
-                               "%s.", deprecated_path,
-                               os.path.join(self.path, "task.yaml"))
-            except IOError:
-                # Since both task.yaml and the (deprecated) "../taskname.yaml"
-                # are missing, we will only warn the user that task.yaml is
-                # missing (to avoid encouraging the use of the deprecated one)
-                raise err
+                    logger.warning("You're using a deprecated location for the "
+                                   "task.yaml file. You're advised to move %s to "
+                                   "%s.", deprecated_path,
+                                   os.path.join(self.path, "task.yaml"))
+                except IOError:
+                    # Since both task.yaml and the (deprecated) "../taskname.yaml"
+                    # are missing, we will only warn the user that task.yaml is
+                    # missing (to avoid encouraging the use of the deprecated one)
+                    raise err
 
         # Here we update the time of the last import
         touch(os.path.join(self.path, ".itime"))
@@ -379,6 +386,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                 primary_language = 'it'
             paths = [os.path.join(self.path, "statement", "statement.pdf"),
                      os.path.join(self.path, "statement.pdf"),
+                     os.path.join(self.path, "enunciado.pdf"),
                      os.path.join(self.path, args["name"]+".pdf"),
                      os.path.join(self.path, "testo", "testo.pdf")]
             for path in paths:
@@ -515,6 +523,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         # that the task type is Batch or OutputOnly, we retrieve the
         # comparator
         paths = [os.path.join(self.path, "check", "checker"),
+                 os.path.join(self.path, "corrector.exe"),
                  os.path.join(self.path, "cor", "correttore")]
         for path in paths:
             if os.path.exists(path):
@@ -527,7 +536,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                 break
         else:
             evaluation_param = "diff"
-
+        
         # Detect subtasks by checking GEN
         gen_filename = os.path.join(self.path, 'gen', 'GEN')
         try:
@@ -602,9 +611,21 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             args["score_type"] = "Sum"
             total_value = float(conf.get("total_value", 100.0))
             input_value = 0.0
+
+            if 'n_input' not in conf:
+                conf['n_input'] = 0
             n_input = int(conf['n_input'])
-            if n_input != 0:
-                input_value = total_value / n_input
+            def count_testcases(folder):
+                c=0
+                if os.path.isdir(folder):
+                    for filename in sorted(os.listdir(folder)):
+                        nombre, ext = os.path.splitext(filename)
+                        if ext==".in":
+                            c+=1
+                return c
+            casos = n_input+count_testcases(os.path.join(self.path, "casos"))+count_testcases(os.path.join(self.path, "casos", "generados"))
+            if casos != 0:
+                input_value = total_value / casos
             args["score_type_parameters"] = "%s" % input_value
 
         # If output_only is set, then the task type is OutputOnly
@@ -682,6 +703,26 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             if args["task_type"] == "OutputOnly":
                 task.attachments += [
                     Attachment("input_%03d.txt" % i, input_digest)]
+
+        def add_testcases_dir(folder):
+            if os.path.isdir(folder):
+                for filename in sorted(os.listdir(folder)):
+                    nombre, ext = os.path.splitext(filename)
+                    if ext==".in":
+                        input_digest = self.file_cacher.put_file_from_path(
+                            os.path.join(folder, filename),
+                            "Input %s for task %s" % (nombre, task.name))
+                        output_digest = self.file_cacher.put_file_from_path(
+                            os.path.join(folder, nombre+".dat"),
+                            "Output %s for task %s" % (nombre, task.name))
+                        args["testcases"] += [
+                            Testcase(nombre, False, input_digest, output_digest)]
+                        if args["task_type"] == "OutputOnly":
+                            task.attachments += [
+                                Attachment(filename, input_digest)]
+        add_testcases_dir(os.path.join(self.path, "casos"))
+        add_testcases_dir(os.path.join(self.path, "casos", "generados"))
+
         public_testcases = load(conf, None, ["public_testcases", "risultati"],
                                 conv=lambda x: "" if x is None else x)
         if public_testcases == "all":
@@ -749,6 +790,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         name = os.path.split(self.path)[1]
 
         if (not os.path.exists(os.path.join(self.path, "task.yaml"))) and \
+           (not os.path.exists(os.path.join(self.path, "problema.yaml"))) and \
            (not os.path.exists(os.path.join(self.path, "..", name + ".yaml"))):
             logger.critical("File missing: \"task.yaml\"")
             sys.exit(1)
@@ -760,9 +802,14 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
                 io.open(os.path.join(self.path, "task.yaml"),
                         "rt", encoding="utf-8"))
         except IOError:
-            conf = yaml.safe_load(
-                io.open(os.path.join(self.path, "..", name + ".yaml"),
-                        "rt", encoding="utf-8"))
+            try:
+                conf = yaml.safe_load(
+                    io.open(os.path.join(self.path, "problema.yaml"),
+                            "rt", encoding="utf-8"))
+            except IOError:
+                conf = yaml.safe_load(
+                    io.open(os.path.join(self.path, "..", name + ".yaml"),
+                            "rt", encoding="utf-8"))
 
         # If there is no .itime file, we assume that the task has changed
         if not os.path.exists(os.path.join(self.path, ".itime")):
@@ -775,11 +822,21 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         # Generate a task's list of files
         # Testcases
         files = []
-        for filename in os.listdir(os.path.join(self.path, "input")):
-            files.append(os.path.join(self.path, "input", filename))
+        if os.path.isdir(os.path.join(self.path, "input")):
+            for filename in os.listdir(os.path.join(self.path, "input")):
+                files.append(os.path.join(self.path, "input", filename))
 
-        for filename in os.listdir(os.path.join(self.path, "output")):
-            files.append(os.path.join(self.path, "output", filename))
+        if os.path.isdir(os.path.join(self.path, "output")):
+            for filename in os.listdir(os.path.join(self.path, "output")):
+                files.append(os.path.join(self.path, "output", filename))
+    
+        if os.path.isdir(os.path.join(self.path, "casos")):
+            for filename in os.listdir(os.path.join(self.path, "casos")):
+                files.append(os.path.join(self.path, "casos", filename))
+
+        if os.path.isdir(os.path.join(self.path, "casos", "generados")):
+            for filename in os.listdir(os.path.join(self.path, "casos", "generados")):
+                files.append(os.path.join(self.path, "casos", "generados", filename))
 
         # Attachments
         if os.path.exists(os.path.join(self.path, "att")):
@@ -790,11 +847,14 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
         files.append(os.path.join(self.path, "gen", "GEN"))
 
         # Statement
+        files.append(os.path.join(self.path, "enunciado.pdf"))
+        files.append(os.path.join(self.path, "statement.pdf"))
         files.append(os.path.join(self.path, "statement", "statement.pdf"))
         files.append(os.path.join(self.path, "testo", "testo.pdf"))
 
         # Managers
         files.append(os.path.join(self.path, "check", "checker"))
+        files.append(os.path.join(self.path, "corrector.exe"))
         files.append(os.path.join(self.path, "cor", "correttore"))
         files.append(os.path.join(self.path, "check", "manager"))
         files.append(os.path.join(self.path, "cor", "manager"))
@@ -811,6 +871,7 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         # Yaml
         files.append(os.path.join(self.path, "task.yaml"))
+        files.append(os.path.join(self.path, "problema.yaml"))
         files.append(os.path.join(self.path, "..", name + ".yaml"))
 
         # Check is any of the files have changed

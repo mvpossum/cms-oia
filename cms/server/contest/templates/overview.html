@@ -183,12 +183,12 @@
             <td>
         {% if t_iter.active_dataset.time_limit is not None %}
             {% if t_iter.active_dataset.time_limit == 1.0 %}
-            {{ _("%(seconds)g second") % {"seconds": t_iter.active_dataset.time_limit} }}
+                {{ _("%(seconds)g second") % {"seconds": t_iter.active_dataset.time_limit} }}
             {% else %}
-            {{ _("%(seconds)g seconds") % {"seconds": t_iter.active_dataset.time_limit} }}
+                {{ _("%(seconds)g seconds") % {"seconds": t_iter.active_dataset.time_limit} }}
             {% end %}
         {% else %}
-        {{ _("N/A") }}
+            {{ _("N/A") }}
         {% end %}
             </td>
             <td>
@@ -209,8 +209,6 @@
             {% end %}
             </td>
         {% end %}
-            </td>
-    {% end %}
         </tr>
     {% end %}
 {% end %}

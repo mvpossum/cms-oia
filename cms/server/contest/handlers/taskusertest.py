@@ -102,16 +102,16 @@ class UserTestInterfaceHandler(BaseHandler):
                     user_tests_left_task = \
                         task.max_user_test_number - len(user_tests[task.id])
 
-            user_tests_left[task.id] = user_tests_left_contest
-            if user_tests_left_task is not None and \
-                (user_tests_left_contest is None or
-                 user_tests_left_contest > user_tests_left_task):
-                user_tests_left[task.id] = user_tests_left_task
+                user_tests_left[task.id] = user_tests_left_contest
+                if user_tests_left_task is not None and \
+                    (user_tests_left_contest is None or
+                     user_tests_left_contest > user_tests_left_task):
+                    user_tests_left[task.id] = user_tests_left_task
 
-            # Make sure we do not show negative value if admins changed
-            # the maximum
-            if user_tests_left[task.id] is not None:
-                user_tests_left[task.id] = max(0, user_tests_left[task.id])
+                # Make sure we do not show negative value if admins changed
+                # the maximum
+                if user_tests_left[task.id] is not None:
+                    user_tests_left[task.id] = max(0, user_tests_left[task.id])
 
         if default_task is None and len(self.contest.tasks) > 0:
             default_task = self.contest.tasks[0]

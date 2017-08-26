@@ -13,7 +13,7 @@ initdb --locale en_US.UTF-8 -E UTF8 -D '/var/lib/postgres/data'
 
 #postgres config
 sudo cp conf/pg_hba.conf conf/postgresql.conf /var/lib/postgres/data/
-cp conf/cms.conf conf/cms.ranking.conf /usr/local/etc/
+sudo cp conf/cms.conf conf/cms.ranking.conf /usr/local/etc/
 
 sudo systemctl enable postgresql
 sudo systemctl start postgresql
