@@ -27,6 +27,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 from __future__ import print_function
 
+import re
 import io
 import logging
 import os
@@ -611,9 +612,11 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
             if 'n_input' not in conf:
                 conf['n_input'] = 0
             n_input = int(conf['n_input'])
-            if "score_type_parameters" in conf:
-                args["score_type"] = "GroupMin"
-                args["score_type_parameters"] = conf["score_type_parameters"]
+            if "score_type" in conf:
+                args["score_type"] = conf["score_type"]
+                if "score_type_parameters" in conf:
+                    args["score_type_parameters"] = ("%s" % conf["score_type_parameters"])
+                    args["score_type_parameters"] = re.sub(r'u\'([^\']+)\'', '\"\g<1>\"', args["score_type_parameters"])
             else:
                 args["score_type"] = "Sum"
                 total_value = float(conf.get("total_value", 100.0))
