@@ -9,7 +9,7 @@ import random
 def genpass():
     if len(argv)==4:
         return argv[3]
-    alphabet = "abcdefghijkmnopqrstuvwxyz23456789?."
+    alphabet = "abcdefghijkmnopqrstuvwxyz23456789"
     pw_length = 6
     return ''.join([alphabet[random.randrange(len(alphabet))] for _ in range(pw_length)])
     
