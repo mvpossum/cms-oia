@@ -608,25 +608,29 @@ class YamlLoader(ContestLoader, TaskLoader, UserLoader, TeamLoader):
 
         # If gen/GEN doesn't exist, just fallback to Sum
         except IOError:
-            args["score_type"] = "Sum"
-            total_value = float(conf.get("total_value", 100.0))
-            input_value = 0.0
-
             if 'n_input' not in conf:
                 conf['n_input'] = 0
             n_input = int(conf['n_input'])
-            def count_testcases(folder):
-                c=0
-                if os.path.isdir(folder):
-                    for filename in sorted(os.listdir(folder)):
-                        nombre, ext = os.path.splitext(filename)
-                        if ext==".in":
-                            c+=1
-                return c
-            casos = n_input+count_testcases(os.path.join(self.path, "casos"))+count_testcases(os.path.join(self.path, "casos", "generados"))
-            if casos != 0:
-                input_value = total_value / casos
-            args["score_type_parameters"] = "%s" % input_value
+            if "score_type_parameters" in conf:
+                args["score_type"] = "GroupMin"
+                args["score_type_parameters"] = conf["score_type_parameters"]
+            else:
+                args["score_type"] = "Sum"
+                total_value = float(conf.get("total_value", 100.0))
+                input_value = 0.0
+
+                def count_testcases(folder):
+                    c=0
+                    if os.path.isdir(folder):
+                        for filename in sorted(os.listdir(folder)):
+                            nombre, ext = os.path.splitext(filename)
+                            if ext==".in":
+                                c+=1
+                    return c
+                casos = n_input+count_testcases(os.path.join(self.path, "casos"))+count_testcases(os.path.join(self.path, "casos", "generados"))
+                if casos != 0:
+                    input_value = total_value / casos
+                args["score_type_parameters"] = "%s" % input_value
 
         # If output_only is set, then the task type is OutputOnly
         if conf.get('output_only', False):
